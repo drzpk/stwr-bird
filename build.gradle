@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlinVersion = '1.1.4-3'
+    ext.gdxVersion = '1.9.6'
 
     repositories {
         mavenLocal()
@@ -10,7 +11,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-
+        classpath "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     }
 }
 
@@ -51,6 +52,7 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     }
 }
 
@@ -60,11 +62,22 @@ project(":core") {
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     }
 }
 
 tasks.eclipse.doLast {
     delete ".project"
+}
+
+// Texture Packer
+project.ext.texturePacker = [ "android/assets/textures", "android/assets", "texture_atlas" ]
+import com.badlogic.gdx.tools.texturepacker.TexturePacker
+
+task texturePacker << {
+    if (project.ext.has('texturePacker')) {
+        logger.info "Calling TexturePacker: "+texturePacker
+        TexturePacker.process(texturePacker[0], texturePacker[1], texturePacker[2])
+    }
 }
