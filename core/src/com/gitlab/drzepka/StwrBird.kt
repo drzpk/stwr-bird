@@ -3,7 +3,6 @@ package com.gitlab.drzepka
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.gitlab.drzepka.screen.BaseScreen
 import com.gitlab.drzepka.screen.GameScreen
 import java.util.*
@@ -12,13 +11,10 @@ class StwrBird : ApplicationAdapter() {
     private val FPS = 30f
     private val frameTime = (1000f / FPS).toLong()
 
-    private lateinit var atlas: TextureAtlas
     private val screenStack = Stack<BaseScreen>()
     private var lastFrame = 0L
 
     override fun create() {
-        // utworzenie atlasu
-        atlas = TextureAtlas(Gdx.files.internal("texture_atlas.atlas"))
 
         // dodanie ekranu głównego
         pushScreen(GameScreen())
@@ -45,7 +41,6 @@ class StwrBird : ApplicationAdapter() {
     fun pushScreen(screen: BaseScreen) {
         // ustawienie pól ekranu
         screen.stwrBird = this
-        screen.atlas = atlas
 
         // wyłączenie obecnego ekranu
         if (screenStack.isNotEmpty()) {
@@ -103,6 +98,6 @@ class StwrBird : ApplicationAdapter() {
             screen.dispose()
         }
 
-        atlas.dispose()
+        Commons.atlas.dispose()
     }
 }

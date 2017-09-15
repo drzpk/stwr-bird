@@ -1,35 +1,22 @@
 package com.gitlab.drzepka.screen
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.gitlab.drzepka.components.BackgroundActor
 
 class GameScreen : BaseScreen() {
 
-    /** Prędkość w pikselach na sekundę */
-    private val SPEED = 240
-
-    private val backgroundDay: TextureRegion by lazy { atlas.findRegion("background_day") }
-    private val batch = SpriteBatch()
-
-    private var backgroundSeries = 0
-    private var backgroundOffset = 0
-    private var backgroundWidth = 0
+    private val stage = Stage(ScreenViewport())
 
     override fun create() {
-        val scale = backgroundDay.regionHeight.toDouble() / height
-        backgroundWidth = Math.round(backgroundDay.regionWidth / scale.toFloat())
-        backgroundSeries = Math.round(width.toDouble() / (backgroundDay.regionWidth * scale)).toInt()
+        val bgActor = BackgroundActor()
+        bgActor.setSize(1f, 1f)
+        bgActor.prepare()
+        stage.addActor(bgActor)
     }
 
     override fun render(delta: Float) {
-        super.render(delta)
-        batch.begin()
-        for (i in 0 until backgroundSeries)
-            batch.draw(backgroundDay, -backgroundOffset.toFloat() + backgroundWidth * i, 0f, backgroundWidth.toFloat(), height.toFloat())
-        batch.end()
-
-        backgroundOffset += Math.round(SPEED.toDouble() * delta).toInt()
-        if (backgroundOffset >= backgroundWidth)
-            backgroundOffset -= backgroundWidth
+        stage.act(delta)
+        stage.draw()
     }
 }

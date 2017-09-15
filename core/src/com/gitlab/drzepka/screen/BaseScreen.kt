@@ -2,13 +2,11 @@ package com.gitlab.drzepka.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.gitlab.drzepka.StwrBird
 
 abstract class BaseScreen : Screen {
 
     lateinit var stwrBird: StwrBird
-    lateinit var atlas: TextureAtlas
 
     var active = false
     var toBeClosed = false
