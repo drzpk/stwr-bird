@@ -1,4 +1,4 @@
-package com.gitlab.drzepka
+package com.gitlab.drzepka.stwrbird
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas

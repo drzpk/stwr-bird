@@ -1,11 +1,11 @@
-package com.gitlab.drzepka.screen
+package com.gitlab.drzepka.stwrbird.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import com.gitlab.drzepka.components.BackgroundActor
-import com.gitlab.drzepka.components.BirdActor
-import com.gitlab.drzepka.components.PlayGameOverlay
+import com.gitlab.drzepka.stwrbird.components.BackgroundActor
+import com.gitlab.drzepka.stwrbird.components.BirdActor
+import com.gitlab.drzepka.stwrbird.components.PlayGameOverlay
 
 class GameScreen : BaseScreen() {
 

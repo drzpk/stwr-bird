@@ -1,4 +1,4 @@
-package com.gitlab.drzepka
+package com.gitlab.drzepka.stwrbird
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Cell

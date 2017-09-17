@@ -1,4 +1,4 @@
-package com.gitlab.drzepka
+package com.gitlab.drzepka.stwrbird
 
 import android.os.Bundle
 import com.badlogic.gdx.backends.android.AndroidApplication

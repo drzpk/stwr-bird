@@ -1,8 +1,8 @@
-package com.gitlab.drzepka.screen
+package com.gitlab.drzepka.stwrbird.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
-import com.gitlab.drzepka.StwrBird
+import com.gitlab.drzepka.stwrbird.StwrBird
 
 abstract class BaseScreen : Screen {
 

@@ -1,6 +1,6 @@
 @file:Suppress("ConstantConditionIf")
 
-package com.gitlab.drzepka.components
+package com.gitlab.drzepka.stwrbird.components
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Animation
@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.gitlab.drzepka.Commons
+import com.gitlab.drzepka.stwrbird.Commons
 import java.util.*
 
 class BirdActor : BaseActor() {

@@ -1,10 +1,10 @@
-package com.gitlab.drzepka.components
+package com.gitlab.drzepka.stwrbird.components
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Table
-import com.gitlab.drzepka.Commons
-import com.gitlab.drzepka.trueWidth
+import com.gitlab.drzepka.stwrbird.Commons
+import com.gitlab.drzepka.stwrbird.trueWidth
 
 class PlayGameOverlay : Table() {
 

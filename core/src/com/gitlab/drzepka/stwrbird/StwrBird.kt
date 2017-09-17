@@ -1,10 +1,10 @@
-package com.gitlab.drzepka
+package com.gitlab.drzepka.stwrbird
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
-import com.gitlab.drzepka.screen.BaseScreen
-import com.gitlab.drzepka.screen.GameScreen
+import com.gitlab.drzepka.stwrbird.screen.BaseScreen
+import com.gitlab.drzepka.stwrbird.screen.GameScreen
 import java.util.*
 
 class StwrBird : ApplicationAdapter() {
