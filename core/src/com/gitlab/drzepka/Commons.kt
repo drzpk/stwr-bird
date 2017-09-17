@@ -8,6 +8,10 @@ object Commons {
     val SPEED = dpi(100)
     /** Atlas tekstur */
     val atlas: TextureAtlas by lazy { TextureAtlas(Gdx.files.internal("texture_atlas.atlas")) }
+    /**
+     * Ustawia tryb debugowania.
+     */
+    val DEBUG = true
 
     /**
      * Konwertuje DPI na piksele.
