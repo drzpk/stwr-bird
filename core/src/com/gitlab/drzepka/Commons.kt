@@ -17,4 +17,9 @@ object Commons {
      * Konwertuje DPI na piksele.
      */
     fun dpi(dpi: Int): Float = dpi * Gdx.graphics.density
+
+    /**
+     * Konwertuje DPI na piksele.
+     */
+    fun dpi(dpi: Float): Float = dpi * Gdx.graphics.density
 }

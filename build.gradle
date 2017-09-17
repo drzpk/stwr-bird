@@ -78,6 +78,8 @@ import com.badlogic.gdx.tools.texturepacker.TexturePacker
 task texturePacker << {
     if (project.ext.has('texturePacker')) {
         logger.info "Calling TexturePacker: "+texturePacker
-        TexturePacker.process(texturePacker[0], texturePacker[1], texturePacker[2])
+        def settings = new TexturePacker.Settings()
+        settings.combineSubdirectories = true
+        TexturePacker.process(settings, texturePacker[0], texturePacker[1], texturePacker[2])
     }
 }

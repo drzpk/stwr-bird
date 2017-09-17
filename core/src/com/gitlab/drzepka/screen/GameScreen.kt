@@ -1,8 +1,10 @@
 package com.gitlab.drzepka.screen
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.gitlab.drzepka.components.BackgroundActor
+import com.gitlab.drzepka.components.BirdActor
 import com.gitlab.drzepka.components.PlayGameOverlay
 
 class GameScreen : BaseScreen() {
@@ -10,19 +12,32 @@ class GameScreen : BaseScreen() {
     private val stage = Stage(ScreenViewport())
     private var mode = Mode.PLAY_GAME_OVERLAY
 
-    override fun create() {
-        val bgActor = BackgroundActor()
-        bgActor.setSize(1f, 1f)
-        bgActor.prepare()
-        stage.addActor(bgActor)
+    private val backgroundActor = BackgroundActor()
+    private val playGameOverlay = PlayGameOverlay()
+    private val birdActor = BirdActor()
 
-        val playGameOverlay = PlayGameOverlay()
+    override fun create() {
+        Gdx.input.inputProcessor = stage
+
+        backgroundActor.setSize(1f, 1f)
+        backgroundActor.prepare()
+        stage.addActor(backgroundActor)
+
         playGameOverlay.setSize(1f, 1f)
         stage.addActor(playGameOverlay)
+
+        stage.addActor(birdActor)
     }
 
     override fun render(delta: Float) {
         stage.act(delta)
+
+        // SPRAWDZENIE KOLIZJI
+        if (backgroundActor.checkForCollision(birdActor)) {
+            // kolizja - koniec gry
+            birdActor.stop()
+        }
+
         stage.draw()
     }
 
