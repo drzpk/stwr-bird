@@ -8,7 +8,7 @@ import com.gitlab.drzepka.screen.GameScreen
 import java.util.*
 
 class StwrBird : ApplicationAdapter() {
-    private val FPS = 30f
+    private val FPS = 60f
     private val frameTime = (1000f / FPS).toLong()
 
     private val screenStack = Stack<BaseScreen>()

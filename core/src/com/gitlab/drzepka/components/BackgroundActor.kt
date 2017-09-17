@@ -29,7 +29,7 @@ class BackgroundActor : BaseActor() {
     private val greenPipe: TextureRegion by lazy { Commons.atlas.findRegion("pipe_green") }
 
     private lateinit var chosenBackground: TextureRegion
-    private val pipeQueue = ArrayDeque<Pipe>()
+    private val pipeQueue = PipeQueue()
 
     private var groundSeries = 0
     private var groundOffset = 0f
@@ -49,34 +49,45 @@ class BackgroundActor : BaseActor() {
         // wypełnienie kolejki rurami
         val amount = Math.ceil(Gdx.app.graphics.width * 2f / (PIPE_WIDTH + PIPE_GAP).toDouble()).toInt()
         var position = Gdx.app.graphics.width * 1.5f
+        val list = ArrayList<Pipe>()
         for (i in 0 until amount) {
             val pipe = Pipe(position)
             computeGap(pipe)
-            pipeQueue.add(pipe)
+            list.add(pipe)
             position += (PIPE_WIDTH + PIPE_DISTANCE)
         }
+        pipeQueue.setCollection(list)
 
         // TODO: losowanie tła
         chosenBackground = backgroundDay
     }
 
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        val moveDistance = Commons.SPEED * Gdx.graphics.deltaTime
+    override fun act(delta: Float) {
+        super.act(delta)
+        val moveDistance = Commons.SPEED * delta
 
+        // RURY
+        if (pipeQueue.first().toBeRemoved) {
+            val pipe = pipeQueue.first()
+            pipe.position = pipeQueue.last().position + PIPE_WIDTH + PIPE_DISTANCE
+            pipe.toBeRemoved = false
+            computeGap(pipe)
+            pipeQueue.shift()
+        }
+        pipeQueue.forEach { it.move(moveDistance) }
+
+        // TŁO
+        groundOffset += moveDistance
+        if (groundOffset >= groundWidth)
+            groundOffset -= groundWidth
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
         // TŁO
         batch?.draw(chosenBackground, 0f, 0f, Gdx.app.graphics.width.toFloat(), Gdx.app.graphics.height.toFloat())
 
         // RURY
-        if (pipeQueue.first.toBeRemoved) {
-            val pipe = pipeQueue.removeFirst()
-            pipe.position = pipeQueue.last.position + PIPE_WIDTH + PIPE_DISTANCE
-            pipe.toBeRemoved = false
-            computeGap(pipe)
-            pipeQueue.addLast(pipe)
-        }
-
         for (pipe in pipeQueue) {
-            pipe.move(moveDistance)
             if (pipe.isInViewport()) {
                 // dolna rura
                 batch?.draw(greenPipe,
@@ -103,10 +114,6 @@ class BackgroundActor : BaseActor() {
         // PODŁOGA
         for (i in 0..groundSeries)
             batch?.draw(ground, i * groundWidth - groundOffset, 0f, groundWidth.toFloat(), GROUND_HEIGHT)
-
-        groundOffset += moveDistance
-        if (groundOffset >= groundWidth)
-            groundOffset -= groundWidth
     }
 
     private fun computeGap(pipe: Pipe) {
@@ -126,5 +133,57 @@ class BackgroundActor : BaseActor() {
         }
 
         fun isInViewport() = position <= Gdx.app.graphics.width
+    }
+
+    /**
+     * Kolejka rur.
+     */
+    class PipeQueue : Iterable<Pipe> {
+
+        private lateinit var array: Array<Pipe>
+        private var current = 0
+
+        /**
+         * Ustawia nową zawartość kolejki na podstawie podanej kolekcji.
+         */
+        fun setCollection(collection: Collection<Pipe>) {
+            array = collection.toTypedArray()
+            current = 0
+        }
+
+        /**
+         * Zwraca pierwszy element kolejki.
+         */
+        fun first(): Pipe = array[current]
+
+        /**
+         * Zwraca ostatni element kolejki.
+         */
+        fun last(): Pipe = array[if (current > 0) current - 1 else array.lastIndex]
+
+        /**
+         * Przesuwa pierwszy element na ostatnią pozycję.
+         */
+        fun shift() {
+            current = (current + 1) % array.size
+        }
+
+        override fun iterator(): Iterator<Pipe> {
+            return object : Iterator<Pipe> {
+
+                private var index = current
+                private var passed = 0
+
+                override fun hasNext(): Boolean = passed < array.size
+
+                override fun next(): Pipe {
+                    val pipe = array[index]
+                    index = (index + 1) % array.size
+                    passed++
+                    return pipe
+                }
+
+            }
+        }
     }
 }
