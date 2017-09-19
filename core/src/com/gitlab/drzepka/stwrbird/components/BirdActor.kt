@@ -14,8 +14,13 @@ import java.util.*
 
 class BirdActor : BaseActor() {
 
+    /** Czas wyświetlania jednej klatki animacji w sekundach */
     private val BIRD_FRAME_DURATION = 0.2f
-    private val GRAVITY_DELTA = Commons.dpi(0.43f)
+    /** Siła grawitacji w pikselach na sekundę */
+    private val GRAVITY_DELTA = Commons.dpi(14.07f)
+    /** Prędkość ptaka po kliknięciu w pikselach na sekundę */
+    private val PUSH_SPEED = Commons.dpi(4.73f)
+    /** Rozmiar ptaka (szerokość) w pikselach */
     private val BIRD_SIZE = Commons.dpi(43)
 
     private val animation: Animation<TextureRegion>
@@ -67,7 +72,7 @@ class BirdActor : BaseActor() {
         stateTime += delta
         bird.setRegion(animation.getKeyFrame(stateTime))
 
-        speed -= GRAVITY_DELTA
+        speed -= GRAVITY_DELTA * delta
         bird.y = Math.max(BackgroundActor.GROUND_HEIGHT, bird.y + speed)
     }
 
@@ -88,7 +93,7 @@ class BirdActor : BaseActor() {
 
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
         if (started) {
-            speed = GRAVITY_DELTA * 13
+            speed = PUSH_SPEED
         }
         return null
     }
