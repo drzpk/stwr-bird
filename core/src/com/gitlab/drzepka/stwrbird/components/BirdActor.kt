@@ -14,9 +14,20 @@ import java.util.*
 
 class BirdActor : BaseActor() {
 
+    /** Czas wyświetlania jednej klatki animacji w sekundach */
     private val BIRD_FRAME_DURATION = 0.2f
-    private val GRAVITY_DELTA = Commons.dpi(0.43f)
+    /** Siła grawitacji w pikselach na sekundę */
+    private val GRAVITY_DELTA = Commons.dpi(15.67f)
+    /** Prędkość ptaka po kliknięciu w pikselach na sekundę */
+    private val PUSH_SPEED = Commons.dpi(4.53f)
+    /** Rozmiar ptaka (szerokość) w pikselach */
     private val BIRD_SIZE = Commons.dpi(43)
+    /** Maksymalna prędkość spadania w pikselach na sekundę (używana do obliczania pochylenia ptaka) */
+    private val MAX_DOWN_SPEED = GRAVITY_DELTA * 0.97f
+    /** Maksymalne odchylenie ptaka w górę w stopniach */
+    private val MAX_UP_ANGLE = 27f
+    /** Szybkość rotacji w górę w stopniach na sekundę */
+    private val ROTATION_DELTA = 369f
 
     private val animation: Animation<TextureRegion>
     private val bird: Sprite
@@ -26,6 +37,7 @@ class BirdActor : BaseActor() {
     private var speed = 0f
     private var birdHeight = 0f
     private var stateTime = 0f
+    private var justHit = false
 
     init {
         val regionName = "bird/bird_" + when (Random().nextInt(3)) {
@@ -64,11 +76,29 @@ class BirdActor : BaseActor() {
 
     override fun act(delta: Float) {
         super.act(delta)
-        stateTime += delta
-        bird.setRegion(animation.getKeyFrame(stateTime))
 
-        speed -= GRAVITY_DELTA
+        // prędkość i położenie
+        speed -= GRAVITY_DELTA * delta
+        if (speed < -MAX_DOWN_SPEED) speed = -MAX_DOWN_SPEED
         bird.y = Math.max(BackgroundActor.GROUND_HEIGHT, bird.y + speed)
+
+        // obrót
+        if (speed >= 0) {
+            bird.rotation = Math.min(bird.rotation + ROTATION_DELTA * delta, MAX_UP_ANGLE)
+        }
+        else {
+            bird.rotation = Math.max(bird.rotation + speed * 0.26f, -90f)
+        }
+
+        // animacja
+        if (bird.rotation < -20) {
+            stateTime = 0f
+            bird.setRegion(animation.getKeyFrame(BIRD_FRAME_DURATION))
+        }
+        else {
+            stateTime += delta
+            bird.setRegion(animation.getKeyFrame(stateTime))
+        }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -88,7 +118,8 @@ class BirdActor : BaseActor() {
 
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
         if (started) {
-            speed = GRAVITY_DELTA * 13
+            speed = PUSH_SPEED
+            justHit = true
         }
         return null
     }
