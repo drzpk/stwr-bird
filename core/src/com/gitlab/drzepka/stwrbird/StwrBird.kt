@@ -8,8 +8,8 @@ import com.gitlab.drzepka.stwrbird.screen.GameScreen
 import java.util.*
 
 class StwrBird : ApplicationAdapter() {
-    private val FPS = 60f
-    private val frameTime = (1000f / FPS).toLong()
+    //private val FPS = 60f
+    //private val frameTime = (1000f / FPS).toLong()
 
     private val screenStack = Stack<BaseScreen>()
     private var lastFrame = 0L
@@ -27,12 +27,13 @@ class StwrBird : ApplicationAdapter() {
         Gdx.gl.glClearColor(1f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-        val delta = System.currentTimeMillis() - lastFrame
+        /*val delta = System.currentTimeMillis() - lastFrame
         if (delta < frameTime)
             Thread.sleep(frameTime - delta)
 
         screenStack.peek().render((System.currentTimeMillis() - lastFrame) / 1000f)
-        lastFrame = System.currentTimeMillis()
+        lastFrame = System.currentTimeMillis()*/
+        screenStack.peek().render(Gdx.graphics.rawDeltaTime)
     }
 
     /**
