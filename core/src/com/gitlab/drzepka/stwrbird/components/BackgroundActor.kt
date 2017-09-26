@@ -29,6 +29,10 @@ class BackgroundActor : BaseActor() {
     /** Minimalna wysokość widocznej częsci rury */
     private val MIN_PIPE_HEIGHT = Commons.dpi(50)
 
+    /** Startuje lub zatrzymuje ruch tła */
+    var started = true
+    /** Włącza lub wyłącza generowanie i ruch rur */
+    var generatePipes = false
 
     private val backgroundDay: TextureRegion by lazy { Commons.atlas.findRegion("background_day") }
     //private val backgroundNight: TextureRegion by lazy { Commons.atlas.findRegion("background_night") }
@@ -96,17 +100,21 @@ class BackgroundActor : BaseActor() {
 
     override fun act(delta: Float) {
         super.act(delta)
+        if (!started) return
+
         val moveDistance = Commons.SPEED * delta
 
         // RURY
-        if (pipeQueue.first().toBeRemoved) {
-            val pipe = pipeQueue.first()
-            pipe.position = pipeQueue.last().position + PIPE_WIDTH + PIPE_DISTANCE
-            pipe.toBeRemoved = false
-            computeGap(pipe)
-            pipeQueue.shift()
+        if (generatePipes) {
+            if (pipeQueue.first().toBeRemoved) {
+                val pipe = pipeQueue.first()
+                pipe.position = pipeQueue.last().position + PIPE_WIDTH + PIPE_DISTANCE
+                pipe.toBeRemoved = false
+                computeGap(pipe)
+                pipeQueue.shift()
+            }
+            pipeQueue.forEach { it.move(moveDistance) }
         }
-        pipeQueue.forEach { it.move(moveDistance) }
 
         // TŁO
         groundOffset += moveDistance

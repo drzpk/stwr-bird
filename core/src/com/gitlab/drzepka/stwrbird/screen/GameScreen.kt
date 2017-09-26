@@ -10,10 +10,10 @@ import com.gitlab.drzepka.stwrbird.components.PlayGameOverlay
 class GameScreen : BaseScreen() {
 
     private val stage = Stage(ScreenViewport())
-    private var mode = Mode.PLAY_GAME_OVERLAY
+    private var mode = Mode.TAP_TO_PLAY
 
+    private val tapToPlayOverlay = PlayGameOverlay()
     private val backgroundActor = BackgroundActor()
-    private val playGameOverlay = PlayGameOverlay()
     private val birdActor = BirdActor()
 
     override fun create() {
@@ -23,34 +23,52 @@ class GameScreen : BaseScreen() {
         backgroundActor.prepare()
         stage.addActor(backgroundActor)
 
-        playGameOverlay.setSize(1f, 1f)
-        stage.addActor(playGameOverlay)
+        tapToPlayOverlay.setSize(1f, 1f)
+        stage.addActor(tapToPlayOverlay)
 
         stage.addActor(birdActor)
+        setMode(Mode.TAP_TO_PLAY)
     }
 
     override fun render(delta: Float) {
+        if (Gdx.input.justTouched() && mode == Mode.TAP_TO_PLAY)
+            setMode(Mode.GAME)
+
         stage.act(delta)
 
         // SPRAWDZENIE KOLIZJI
         if (backgroundActor.checkForCollision(birdActor)) {
             // kolizja - koniec gry
-            birdActor.stop()
+            setMode(Mode.GAME_OVER)
         }
 
         stage.draw()
     }
 
-
     private fun setMode(mode: Mode) {
+        when (mode) {
+            GameScreen.Mode.FIRST -> TODO()
+            GameScreen.Mode.TAP_TO_PLAY -> {
 
+            }
+            GameScreen.Mode.GAME -> {
+                tapToPlayOverlay.isVisible = false
+                backgroundActor.generatePipes = true
+                birdActor.started = true
+            }
+            GameScreen.Mode.GAME_OVER -> {
+                backgroundActor.started = false
+                birdActor.started = false
+            }
+        }
+
+        this.mode = mode
     }
 
-
     private enum class Mode {
-        MAIN_OVERLAY,
-        PLAY_GAME_OVERLAY,
+        FIRST,
+        TAP_TO_PLAY,
         GAME,
-        GAME_OVER_OVERLAY
+        GAME_OVER
     }
 }

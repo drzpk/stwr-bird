@@ -22,6 +22,10 @@ class BirdActor : BaseActor() {
     private val PUSH_SPEED = Commons.dpi(4.73f)
     /** Rozmiar ptaka (szerokość) w pikselach */
     private val BIRD_SIZE = Commons.dpi(43)
+    /** Pozycja ptaka względem lewej krawędzi ekranu w pikselach */
+    private val BIRD_POSITION = Commons.dpi(38)
+    /** Wychylenie pkata podczas kołysania się przed rozpoczęciem gry */
+    private val BIRD_SWING = Commons.dpi(9)
     /** Maksymalna prędkość spadania w pikselach na sekundę (używana do obliczania pochylenia ptaka) */
     private val MAX_DOWN_SPEED = GRAVITY_DELTA * 0.97f
     /** Maksymalne odchylenie ptaka w górę w stopniach */
@@ -29,15 +33,21 @@ class BirdActor : BaseActor() {
     /** Szybkość rotacji w górę w stopniach na sekundę */
     private val ROTATION_DELTA = 369f
 
+    /** Włącza lub zatrzymuje ruch ptaka */
+    var started = false
+        set(value) {
+            swingMode = false
+            field = value
+        }
+
     private val animation: Animation<TextureRegion>
     private val bird: Sprite
     private val debugRenderer = if (Commons.DEBUG) ShapeRenderer() else null
 
-    private var started = true
     private var speed = 0f
     private var birdHeight = 0f
     private var stateTime = 0f
-    private var justHit = false
+    private var swingMode = true
 
     init {
         val regionName = "bird/bird_" + when (Random().nextInt(3)) {
@@ -48,7 +58,7 @@ class BirdActor : BaseActor() {
 
         animation = Animation(BIRD_FRAME_DURATION, Commons.atlas.findRegions(regionName), Animation.PlayMode.LOOP_PINGPONG)
         bird = Sprite(animation.getKeyFrame(0f))
-        bird.setPosition(Gdx.graphics.width / 2f, Gdx.graphics.height / 2f)
+        bird.setPosition(BIRD_POSITION, Gdx.graphics.height / 2f)
 
         val scale = BIRD_SIZE / animation.getKeyFrame(0f).regionWidth
         bird.setSize(bird.width * scale, bird.height * scale)
@@ -57,25 +67,36 @@ class BirdActor : BaseActor() {
     }
 
     /**
-     * Zatrzymuje ruch ptaka.
-     */
-    fun stop() {
-        started = false
-    }
-
-    /**
-     * Resetuje pozycję ptaka do domyślnej.
+     * Resetuje pozycję ptaka do domyślnej i wyłącza jego ruch.
      */
     fun reset() {
-        started = true
+        started = false
         birdHeight = Gdx.app.graphics.height / 2f
         stateTime = 0f
+        swingMode = true
     }
 
     override fun getMainSprite(): Sprite? = bird
 
     override fun act(delta: Float) {
         super.act(delta)
+
+        // animacja skrzydeł
+        if (bird.rotation < -20) {
+            stateTime = 0f
+            bird.setRegion(animation.getKeyFrame(BIRD_FRAME_DURATION))
+        }
+        else {
+            stateTime += delta
+            bird.setRegion(animation.getKeyFrame(stateTime))
+        }
+
+        if (!started && swingMode) {
+            // animacja kołysania się ptaka
+            val height = Gdx.graphics.height / 2 + (Math.sin(stateTime.toDouble() * 6.4f) * BIRD_SWING)
+            bird.y = height.toFloat()
+            return
+        }
 
         // prędkość i położenie
         speed -= GRAVITY_DELTA * delta
@@ -88,16 +109,6 @@ class BirdActor : BaseActor() {
         }
         else {
             bird.rotation = Math.max(bird.rotation + speed * 0.26f, -90f)
-        }
-
-        // animacja
-        if (bird.rotation < -20) {
-            stateTime = 0f
-            bird.setRegion(animation.getKeyFrame(BIRD_FRAME_DURATION))
-        }
-        else {
-            stateTime += delta
-            bird.setRegion(animation.getKeyFrame(stateTime))
         }
     }
 
