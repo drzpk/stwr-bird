@@ -17,9 +17,9 @@ class BirdActor : BaseActor() {
     /** Czas wyświetlania jednej klatki animacji w sekundach */
     private val BIRD_FRAME_DURATION = 0.2f
     /** Siła grawitacji w pikselach na sekundę */
-    private val GRAVITY_DELTA = Commons.dpi(15.67f)
+    private val GRAVITY_DELTA = Commons.dpi(14.07f)
     /** Prędkość ptaka po kliknięciu w pikselach na sekundę */
-    private val PUSH_SPEED = Commons.dpi(4.53f)
+    private val PUSH_SPEED = Commons.dpi(4.73f)
     /** Rozmiar ptaka (szerokość) w pikselach */
     private val BIRD_SIZE = Commons.dpi(43)
     /** Maksymalna prędkość spadania w pikselach na sekundę (używana do obliczania pochylenia ptaka) */
@@ -119,7 +119,6 @@ class BirdActor : BaseActor() {
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
         if (started) {
             speed = PUSH_SPEED
-            justHit = true
         }
         return null
     }
