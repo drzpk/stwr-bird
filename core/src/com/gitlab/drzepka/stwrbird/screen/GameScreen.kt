@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.gitlab.drzepka.stwrbird.components.BackgroundActor
 import com.gitlab.drzepka.stwrbird.components.BirdActor
+import com.gitlab.drzepka.stwrbird.components.GameOverActor
 import com.gitlab.drzepka.stwrbird.components.PlayGameOverlay
 
 class GameScreen : BaseScreen() {
@@ -13,6 +14,7 @@ class GameScreen : BaseScreen() {
     private var mode = Mode.TAP_TO_PLAY
 
     private val tapToPlayOverlay = PlayGameOverlay()
+    private val gameOverActor = GameOverActor()
     private val backgroundActor = BackgroundActor()
     private val birdActor = BirdActor()
 
@@ -25,6 +27,8 @@ class GameScreen : BaseScreen() {
 
         tapToPlayOverlay.setSize(1f, 1f)
         stage.addActor(tapToPlayOverlay)
+
+        gameOverActor.prepare()
 
         stage.addActor(birdActor)
         setMode(Mode.TAP_TO_PLAY)
@@ -55,10 +59,12 @@ class GameScreen : BaseScreen() {
                 tapToPlayOverlay.isVisible = false
                 backgroundActor.generatePipes = true
                 birdActor.started = true
+                gameOverActor.remove()
             }
             GameScreen.Mode.GAME_OVER -> {
                 backgroundActor.started = false
                 birdActor.started = false
+                stage.addActor(gameOverActor)
             }
         }
 
