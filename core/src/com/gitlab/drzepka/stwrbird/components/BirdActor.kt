@@ -43,9 +43,9 @@ class BirdActor : BaseActor() {
             field = value
         }
 
-    private val animation: Animation<TextureRegion>
-    private val bird: Sprite
-    private val polygon: Polygon
+    private lateinit var animation: Animation<TextureRegion>
+    private var bird = Sprite()
+    private var polygon = Polygon()
 
     private var speed = 0f
     private var birdHeight = 0f
@@ -54,16 +54,11 @@ class BirdActor : BaseActor() {
     private var stateTime = 0f
     private var swingMode = true
 
-    init {
-        val regionName = "bird/bird_" + when (Random().nextInt(3)) {
-            0 -> "blue"
-            1 -> "orange"
-            else -> "red"
-        }
+    override fun prepare() {
+        reset()
 
-        animation = Animation(BIRD_FRAME_DURATION, Commons.atlas.findRegions(regionName), Animation.PlayMode.LOOP_PINGPONG)
         bird = Sprite(animation.getKeyFrame(0f))
-        bird.setPosition(BIRD_POSITION, Gdx.graphics.height / 2f)
+        bird.setPosition(BIRD_POSITION, birdHeight)
         bird.setOriginCenter()
 
         val scale = BIRD_SIZE / animation.getKeyFrame(0f).regionWidth
@@ -91,10 +86,20 @@ class BirdActor : BaseActor() {
     /**
      * Resetuje pozycję ptaka do domyślnej i wyłącza jego ruch.
      */
-    fun reset() {
-        started = false
+    override fun reset() {
+        val regionName = "bird/bird_" + when (Random().nextInt(3)) {
+            0 -> "blue"
+            1 -> "orange"
+            else -> "red"
+        }
+        animation = Animation(BIRD_FRAME_DURATION, Commons.atlas.findRegions(regionName), Animation.PlayMode.LOOP_PINGPONG)
+
         birdHeight = Gdx.app.graphics.height / 2f
         stateTime = 0f
+        speed = 0f
+        bird.rotation = 0f
+
+        started = false
         swingMode = true
     }
 

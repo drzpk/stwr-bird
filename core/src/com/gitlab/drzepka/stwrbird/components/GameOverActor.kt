@@ -22,6 +22,8 @@ class GameOverActor : Table(), ActorInterface {
         debug = true
     }
 
+    override fun reset() = Unit
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
     }
@@ -48,8 +50,9 @@ class GameOverActor : Table(), ActorInterface {
             bestScoreText.value = 99
         }
 
-        override fun prepare() {
-        }
+        override fun prepare() = Unit
+
+        override fun reset() = Unit
 
         override fun draw(batch: Batch?, parentAlpha: Float) {
             super.draw(batch, parentAlpha)

@@ -29,6 +29,7 @@ class GameScreen : BaseScreen() {
         stage.addActor(tapToPlayOverlay)
 
         gameOverActor.prepare()
+        birdActor.prepare()
 
         stage.addActor(birdActor)
         setMode(Mode.TAP_TO_PLAY)
@@ -37,6 +38,14 @@ class GameScreen : BaseScreen() {
     override fun render(delta: Float) {
         if (Gdx.input.justTouched() && mode == Mode.TAP_TO_PLAY)
             setMode(Mode.GAME)
+
+        if (Gdx.input.justTouched()) {
+            @Suppress("NON_EXHAUSTIVE_WHEN")
+            when (mode) {
+                Mode.TAP_TO_PLAY -> setMode(Mode.GAME)
+                Mode.GAME_OVER -> setMode(Mode.TAP_TO_PLAY)
+            }
+        }
 
         stage.act(delta)
 
@@ -53,7 +62,10 @@ class GameScreen : BaseScreen() {
         when (mode) {
             GameScreen.Mode.FIRST -> TODO()
             GameScreen.Mode.TAP_TO_PLAY -> {
-
+                birdActor.reset()
+                backgroundActor.reset()
+                gameOverActor.remove()
+                tapToPlayOverlay.isVisible = true
             }
             GameScreen.Mode.GAME -> {
                 tapToPlayOverlay.isVisible = false
@@ -63,6 +75,7 @@ class GameScreen : BaseScreen() {
             }
             GameScreen.Mode.GAME_OVER -> {
                 backgroundActor.started = false
+                backgroundActor.generatePipes = false
                 birdActor.started = false
                 stage.addActor(gameOverActor)
             }

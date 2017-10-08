@@ -7,6 +7,9 @@ interface ActorInterface {
     /** Wywoływana po utworzeniu obiektu i ustawieniu pól */
     fun prepare() = Unit
 
+    /** Resetuje aktora do domyślnego stanu */
+    fun reset() = Unit
+
     /** Wywoływana, gdy aktor powinien zwolnić zaalokowane zasoby */
     fun dispose() = Unit
 

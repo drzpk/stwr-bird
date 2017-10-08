@@ -37,7 +37,7 @@ class BackgroundActor : BaseActor() {
     var generatePipes = false
 
     private val backgroundDay: TextureRegion by lazy { Commons.atlas.findRegion("background_day") }
-    //private val backgroundNight: TextureRegion by lazy { Commons.atlas.findRegion("background_night") }
+    private val backgroundNight: TextureRegion by lazy { Commons.atlas.findRegion("background_night") }
     private val ground: TextureRegion by lazy { Commons.atlas.findRegion("ground") }
     private val greenPipe: TextureRegion by lazy { Commons.atlas.findRegion("pipe_green") }
 
@@ -62,6 +62,21 @@ class BackgroundActor : BaseActor() {
         val pipeRatio = PIPE_WIDTH / greenPipe.regionWidth
         pipeHeight = greenPipe.regionHeight * pipeRatio
 
+        reset()
+
+        // Ustawienie wielokąta rur do sprawdzania kolizji.
+        upperPipePolygon.vertices = floatArrayOf(
+                0f, 0f,
+                0f, pipeHeight,
+                PIPE_WIDTH, pipeHeight,
+                PIPE_WIDTH, 0f
+        )
+        lowerPipePolygon.vertices = upperPipePolygon.vertices.copyOf()
+
+        debug = Commons.DEBUG
+    }
+
+    override fun reset() {
         // wypełnienie kolejki rurami
         val amount = Math.ceil(Gdx.app.graphics.width * 2f / (PIPE_WIDTH + PIPE_DISTANCE).toDouble()).toInt()
         var position = Gdx.app.graphics.width * 1.5f
@@ -74,19 +89,12 @@ class BackgroundActor : BaseActor() {
         }
         pipeQueue.setCollection(list)
 
-        // Ustawienie wielokąta rur do sprawdzania kolizji.
-        upperPipePolygon.vertices = floatArrayOf(
-                0f, 0f,
-                0f, pipeHeight,
-                PIPE_WIDTH, pipeHeight,
-                PIPE_WIDTH, 0f
-        )
-        lowerPipePolygon.vertices = upperPipePolygon.vertices.copyOf()
+        // losowanie tła
+        chosenBackground = if (Random().nextBoolean()) backgroundDay else backgroundNight
 
-        // TODO: losowanie tła
-        chosenBackground = backgroundDay
-
-        debug = Commons.DEBUG
+        // zresetowanie flag
+        started = true
+        generatePipes = false
     }
 
     /**
