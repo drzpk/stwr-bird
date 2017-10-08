@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.gitlab.drzepka.stwrbird.Commons
 import java.util.*
@@ -19,9 +20,11 @@ class BirdActor : BaseActor() {
     /** Siła grawitacji w pikselach na sekundę */
     private val GRAVITY_DELTA = Commons.dpi(14.07f)
     /** Prędkość ptaka po kliknięciu w pikselach na sekundę */
-    private val PUSH_SPEED = Commons.dpi(4.73f)
+    private val PUSH_SPEED = Commons.dpi(4.52f)
     /** Rozmiar ptaka (szerokość) w pikselach */
-    private val BIRD_SIZE = Commons.dpi(43)
+    private val BIRD_SIZE = Commons.dpi(38)
+    /** Współczynnik określający stosunek "pudełka kolizji" do rozmiaru ptaka */
+    private val BIRD_COLLISION_BOX_FACTOR = 0.85f
     /** Pozycja ptaka względem lewej krawędzi ekranu w pikselach */
     private val BIRD_POSITION = Commons.dpi(38)
     /** Wychylenie pkata podczas kołysania się przed rozpoczęciem gry */
@@ -36,16 +39,18 @@ class BirdActor : BaseActor() {
     /** Włącza lub zatrzymuje ruch ptaka */
     var started = false
         set(value) {
-            swingMode = false
+            swingMode = false // aby przywrócić początkową wartość pola, należy wywołać metodę reset()
             field = value
         }
 
     private val animation: Animation<TextureRegion>
     private val bird: Sprite
-    private val debugRenderer = if (Commons.DEBUG) ShapeRenderer() else null
+    private val polygon: Polygon
 
     private var speed = 0f
     private var birdHeight = 0f
+    private var collisionBoxXOffset = 0f
+    private var collisionBoxYOffset = 0f
     private var stateTime = 0f
     private var swingMode = true
 
@@ -59,11 +64,28 @@ class BirdActor : BaseActor() {
         animation = Animation(BIRD_FRAME_DURATION, Commons.atlas.findRegions(regionName), Animation.PlayMode.LOOP_PINGPONG)
         bird = Sprite(animation.getKeyFrame(0f))
         bird.setPosition(BIRD_POSITION, Gdx.graphics.height / 2f)
+        bird.setOriginCenter()
 
         val scale = BIRD_SIZE / animation.getKeyFrame(0f).regionWidth
         bird.setSize(bird.width * scale, bird.height * scale)
 
-        debug = true
+        // utworzenie wielokąta wykorzystywanego do wykrywania kolizji
+        val box = bird.boundingRectangle
+        polygon = Polygon(floatArrayOf(
+                0f, 0f,
+                0f, box.height * BIRD_COLLISION_BOX_FACTOR,
+                box.width * BIRD_COLLISION_BOX_FACTOR, box.height * BIRD_COLLISION_BOX_FACTOR,
+                box.width * BIRD_COLLISION_BOX_FACTOR, 0f
+        ))
+
+        // zmniejszenie pudełka kolizji
+        collisionBoxXOffset = (box.width * (1f - BIRD_COLLISION_BOX_FACTOR)) / 2
+        collisionBoxYOffset = (box.height * (1f - BIRD_COLLISION_BOX_FACTOR)) / 2
+
+        polygon.setPosition(box.x, box.y)
+        polygon.setOrigin(box.width / 2, box.height / 2)
+
+        debug = Commons.DEBUG
     }
 
     /**
@@ -76,7 +98,7 @@ class BirdActor : BaseActor() {
         swingMode = true
     }
 
-    override fun getMainSprite(): Sprite? = bird
+    override fun getPolygon(): Polygon? = polygon
 
     override fun act(delta: Float) {
         super.act(delta)
@@ -102,6 +124,8 @@ class BirdActor : BaseActor() {
         speed -= GRAVITY_DELTA * delta
         if (speed < -MAX_DOWN_SPEED) speed = -MAX_DOWN_SPEED
         bird.y = Math.max(BackgroundActor.GROUND_HEIGHT, bird.y + speed)
+        polygon.setPosition(bird.x + collisionBoxXOffset, bird.y + collisionBoxYOffset)
+        polygon.setOrigin(bird.originX, bird.originY)
 
         // obrót
         if (speed >= 0) {
@@ -110,21 +134,17 @@ class BirdActor : BaseActor() {
         else {
             bird.rotation = Math.max(bird.rotation + speed * 0.26f, -90f)
         }
+        polygon.rotation = bird.rotation
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         bird.draw(batch)
+    }
 
-        if (Commons.DEBUG) {
-            batch?.end()
-            debugRenderer?.begin(ShapeRenderer.ShapeType.Line)
-            debugRenderer?.setColor(1f, 0f, 0f, 1f)
-            Gdx.gl.glLineWidth(2f)
-            val rect = bird.boundingRectangle
-            debugRenderer?.rect(rect.x, rect.y, rect.width, rect.height)
-            debugRenderer?.end()
-            batch?.begin()
-        }
+    override fun drawDebug(shapes: ShapeRenderer?) {
+        super.drawDebug(shapes)
+        shapes?.setColor(1f, 0f, 0f, 1f)
+        shapes?.polygon(polygon.transformedVertices)
     }
 
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {

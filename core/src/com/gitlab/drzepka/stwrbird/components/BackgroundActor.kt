@@ -6,7 +6,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Intersector
+import com.badlogic.gdx.math.Polygon
 import com.gitlab.drzepka.stwrbird.Commons
 import java.util.*
 import kotlin.collections.ArrayList
@@ -20,12 +21,13 @@ class BackgroundActor : BaseActor() {
         /** Wysokość podłoża */
         internal val GROUND_HEIGHT = Commons.dpi(80)
     }
+
     /** Szerokość rury */
     private val PIPE_WIDTH = Commons.dpi(65)
     /** Odległość między rurami */
     private val PIPE_DISTANCE = Commons.dpi(120)
     /** Wysokość przestrzeni między rurami */
-    private val PIPE_GAP = Commons.dpi(115)
+    private val PIPE_GAP = Commons.dpi(125)
     /** Minimalna wysokość widocznej częsci rury */
     private val MIN_PIPE_HEIGHT = Commons.dpi(50)
 
@@ -38,11 +40,11 @@ class BackgroundActor : BaseActor() {
     //private val backgroundNight: TextureRegion by lazy { Commons.atlas.findRegion("background_night") }
     private val ground: TextureRegion by lazy { Commons.atlas.findRegion("ground") }
     private val greenPipe: TextureRegion by lazy { Commons.atlas.findRegion("pipe_green") }
-    private val debugRenderer = if (Commons.DEBUG) ShapeRenderer() else null
-    private val debugRects = if (Commons.DEBUG) ArrayList<Rectangle>() else null
 
     private lateinit var chosenBackground: TextureRegion
     private val pipeQueue = PipeQueue()
+    private val upperPipePolygon = Polygon()
+    private val lowerPipePolygon = Polygon()
 
     private var groundSeries = 0
     private var groundOffset = 0f
@@ -72,30 +74,45 @@ class BackgroundActor : BaseActor() {
         }
         pipeQueue.setCollection(list)
 
+        // Ustawienie wielokąta rur do sprawdzania kolizji.
+        upperPipePolygon.vertices = floatArrayOf(
+                0f, 0f,
+                0f, pipeHeight,
+                PIPE_WIDTH, pipeHeight,
+                PIPE_WIDTH, 0f
+        )
+        lowerPipePolygon.vertices = upperPipePolygon.vertices.copyOf()
+
         // TODO: losowanie tła
         chosenBackground = backgroundDay
+
+        debug = Commons.DEBUG
     }
 
     /**
      * Sprawdza, czy dany aktor koliduje z podłożem lub z jedną z rur.
      */
     fun checkForCollision(actor: BaseActor): Boolean {
-        if (actor.getMainSprite() == null)
-            return false
-        val rect = actor.getMainSprite()?.boundingRectangle!!
+        val actorPolygon = actor.getPolygon() ?: return false
 
         // sprawdzenie kolizji z podłożem
-        if (rect.y <= GROUND_HEIGHT)
+        val lowest = actorPolygon.transformedVertices?.filterIndexed { index, _ -> index % 2 != 0 }?.min()
+        if (lowest != null && lowest <= GROUND_HEIGHT)
             return true
 
         // sprawdzenie kolizji tylko z najbliższą rurą
-        val nearest = pipeQueue.minBy { Math.abs(rect.x - it.position) }!!
-        if (Commons.DEBUG) {
-            debugRects?.clear()
-            debugRects?.addAll(nearest.getBoundingRects())
+        val xVertices = actorPolygon.transformedVertices?.filterIndexed { index, _ -> index % 2 == 0 }!!
+        val rightX = xVertices.max()!!
+        val nearestPipe = pipeQueue.minBy { Math.abs(rightX - it.position) }!!
+        upperPipePolygon.setPosition(nearestPipe.position, nearestPipe.gapPoint + PIPE_GAP)
+        lowerPipePolygon.setPosition(nearestPipe.position, nearestPipe.gapPoint - pipeHeight)
+        if (Intersector.overlapConvexPolygons(actorPolygon, upperPipePolygon)
+                || Intersector.overlapConvexPolygons(actorPolygon, lowerPipePolygon)) {
+            // kolizja ptaka z rurą
+            return true
         }
 
-        return nearest.getBoundingRects().any { it.overlaps(rect) }
+        return false
     }
 
     override fun act(delta: Float) {
@@ -154,18 +171,15 @@ class BackgroundActor : BaseActor() {
         // PODŁOGA
         for (i in 0..groundSeries)
             batch?.draw(ground, i * groundWidth - groundOffset, 0f, groundWidth.toFloat(), GROUND_HEIGHT)
+    }
 
-        // DEBUG
-        if (Commons.DEBUG) {
-            batch?.end()
-            debugRenderer?.begin(ShapeRenderer.ShapeType.Line)
-            debugRenderer?.setColor(1f, 0f, 0f, 1f)
-            Gdx.gl.glLineWidth(2f)
-            for (rect in debugRects!!)
-                debugRenderer?.rect(rect.x, rect.y, rect.width, rect.height)
-            debugRenderer?.end()
-            batch?.begin()
-        }
+    override fun drawDebug(shapes: ShapeRenderer?) {
+        // przed rozpoczęciem gry rury nie mają jeszcze obliczonej pozycji
+        if (!generatePipes)
+            return
+        shapes?.setColor(1f, 0f, 0f, 1f)
+        shapes?.polygon(upperPipePolygon.transformedVertices)
+        shapes?.polygon(lowerPipePolygon.transformedVertices)
     }
 
     private fun computeGap(pipe: Pipe) {
@@ -174,32 +188,10 @@ class BackgroundActor : BaseActor() {
         pipe.gapPoint = random + GROUND_HEIGHT + MIN_PIPE_HEIGHT
     }
 
-    inner class Pipe(var position: Float) {
+    inner class Pipe(/** Pozycja X początku rury*/ var position: Float) {
+        /** Dolny punkt Y przestrzeni pomiędzy rurami - (górny punkt Y dolnej rury) */
         var gapPoint = 0f
         var toBeRemoved = false
-        private val boundingRects = Array(2, { Rectangle() })
-
-        /**
-         * Zwraca obiekty typu [Rectangle] informujące o położeniu i wymiarach rur w jednej kolumnie.
-         */
-        fun getBoundingRects(): Array<Rectangle> {
-            // ustawienie wysokości rury na dużą wartość, aby niemożliwe było jej przelecenie od góry
-            val pipeHeight = 1000f
-
-            // górna rura
-            boundingRects[0].x = position
-            boundingRects[0].y = gapPoint + PIPE_GAP
-            boundingRects[0].width = PIPE_WIDTH
-            boundingRects[0].height = pipeHeight
-
-            // dolna rura
-            boundingRects[1].x = position
-            boundingRects[1].y = gapPoint - pipeHeight
-            boundingRects[1].width = PIPE_WIDTH
-            boundingRects[1].height = pipeHeight
-
-            return boundingRects
-        }
 
         fun move(delta: Float) {
             position -= delta

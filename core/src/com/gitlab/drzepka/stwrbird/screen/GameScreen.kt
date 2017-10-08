@@ -41,7 +41,7 @@ class GameScreen : BaseScreen() {
         stage.act(delta)
 
         // SPRAWDZENIE KOLIZJI
-        if (backgroundActor.checkForCollision(birdActor)) {
+        if (mode == Mode.GAME && backgroundActor.checkForCollision(birdActor)) {
             // kolizja - koniec gry
             setMode(Mode.GAME_OVER)
         }
