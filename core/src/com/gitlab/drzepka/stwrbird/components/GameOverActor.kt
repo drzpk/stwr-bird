@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.gitlab.drzepka.stwrbird.Commons
+import com.gitlab.drzepka.stwrbird.font.BaseFont
 import com.gitlab.drzepka.stwrbird.font.MediumFont
 import com.gitlab.drzepka.stwrbird.trueWidth
 
@@ -44,9 +45,9 @@ class GameOverActor : Table(), ActorInterface {
             newImage.trueWidth(Commons.dpi(34))
             newImage.setPosition(Commons.dpi(174), Commons.dpi(53))
 
-            scoreText.setPosition(Commons.dpi(251), Commons.dpi(79), true)
+            scoreText.setPosition(Commons.dpi(251), Commons.dpi(79), BaseFont.Align.RIGHT)
             scoreText.value = 1234
-            bestScoreText.setPosition(Commons.dpi(251), Commons.dpi(29), true)
+            bestScoreText.setPosition(Commons.dpi(251), Commons.dpi(29), BaseFont.Align.RIGHT)
             bestScoreText.value = 99
         }
 

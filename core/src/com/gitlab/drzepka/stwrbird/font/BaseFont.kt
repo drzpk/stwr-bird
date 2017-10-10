@@ -25,10 +25,11 @@ abstract class BaseFont(
 
     private var queue: Array<Int> = arrayOf(0)
     private var posX = 0f
+    private var computedPosX = 0f
     private var posY = fontTexture.regionHeight.toFloat()
     private val width: Float
     private val height: Float
-    private var rightAlign = false
+    private var align = Align.LEFT
     private var delta = 0f
 
     /** Wyświetlana wartość */
@@ -49,14 +50,16 @@ abstract class BaseFont(
     }
 
     /**
-     * Ustawia pozycję i wyrównanie tekstu. Współrzędna Y wzkazuje na dolną krawędź napisu. Jeśli wyrównanie do
-     * prawej jest włączone, współrzędna X wskazuje na prawą krawędź napisu. Pozycja musi zostać ustawiona przed
-     * wartością, lub liczba będzie wyświetlana niepoprawnie.
+     * Ustawia pozycję i wyrównanie tekstu. Współrzędna Y wzkazuje na dolną krawędź napisu. Wyrównanie
+     * określa pozycję X względem napisu (przykładowo jeśli wyrównanie będzie ustawione na [Align.LEFT],
+     * pozycja X będzie wskazywała lewą krawędź napisu).
+     *
+     * Pozycja musi zostać ustawiona przed wartością, lub liczba będzie wyświetlana niepoprawnie.
      */
-    fun setPosition(posX: Float, posY: Float, rightAlign: Boolean = false) {
-        this.posX = if (!rightAlign) posX else posX - digitWidth.toFloat()
+    fun setPosition(posX: Float, posY: Float, align: Align = Align.LEFT) {
+        this.posX = posX
         this.posY = posY
-        this.rightAlign = rightAlign
+        this.align = align
     }
 
     private fun update() {
@@ -68,19 +71,28 @@ abstract class BaseFont(
             tmpVal /= 10
         }
 
+        // konwersja kolejki
         queue = list.toTypedArray()
-        if (!rightAlign)
+        if (align != Align.RIGHT)
             queue.reverse()
 
-        // ustawienie odległości między początkami znaków
-        delta = (fontSize + spacing) * (if (rightAlign) -1 else 1)
+        // ustawienie odległości między POCZĄTKAMI znaków
+        delta = fontSize + spacing
+
+        // ustawienie faktycznego początku napisu, po uwgdlędnieniu wyrównania (align)
+        val width = queue.size * delta - spacing
+        computedPosX = when (align) {
+            BaseFont.Align.LEFT -> posX
+            BaseFont.Align.CENTER -> posX - width / 2
+            BaseFont.Align.RIGHT -> posX - width
+        }
     }
 
     fun draw(batch: Batch) {
         var offset = 0f
         queue.forEach {
             batch.draw(fontTexture.texture,
-                    posX + offset,
+                    computedPosX + offset,
                     posY,
                     width,
                     height,
@@ -92,5 +104,9 @@ abstract class BaseFont(
                     false)
             offset += delta
         }
+    }
+
+    enum class Align {
+        LEFT, CENTER, RIGHT
     }
 }
