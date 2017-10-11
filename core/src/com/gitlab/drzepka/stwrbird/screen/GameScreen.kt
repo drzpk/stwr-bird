@@ -18,8 +18,13 @@ class GameScreen : BaseScreen() {
     private val backgroundActor = BackgroundActor()
     private val birdActor = BirdActor()
 
+    private var bestScore = 0
+
     override fun create() {
         Gdx.input.inputProcessor = stage
+
+        // załadowanie najlepszego wyniku
+        bestScore = Gdx.app.getPreferences("stwr-bird").getInteger("best_score", 0)
 
         backgroundActor.setSize(1f, 1f)
         backgroundActor.prepare()
@@ -77,6 +82,27 @@ class GameScreen : BaseScreen() {
                 backgroundActor.started = false
                 backgroundActor.generatePipes = false
                 birdActor.started = false
+
+                // obliczenie wyniku i przyznanie medalu
+                val score = backgroundActor.score
+                val medal = when {
+                    score > 100 -> GameOverActor.Medal.PLATINIUM
+                    score > 70 -> GameOverActor.Medal.GOLD
+                    score > 30 -> GameOverActor.Medal.SILVER
+                    score > 15 -> GameOverActor.Medal.BRONZE
+                    else -> GameOverActor.Medal.NONE
+                }
+                gameOverActor.newBest = if (score > bestScore) {
+                    val preferences = Gdx.app.getPreferences("stwr-bird")
+                    preferences.putInteger("best_score", score)
+                    preferences.flush()
+                    bestScore = score
+                    true
+                } else
+                    false
+                gameOverActor.score = score
+                gameOverActor.bestScore = bestScore
+                gameOverActor.medal = medal
                 stage.addActor(gameOverActor)
             }
         }

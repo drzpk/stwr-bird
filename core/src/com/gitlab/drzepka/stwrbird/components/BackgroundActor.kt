@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Polygon
 import com.gitlab.drzepka.stwrbird.Commons
+import com.gitlab.drzepka.stwrbird.font.BaseFont
+import com.gitlab.drzepka.stwrbird.font.BigFont
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -40,6 +42,7 @@ class BackgroundActor : BaseActor() {
     private val backgroundNight: TextureRegion by lazy { Commons.atlas.findRegion("background_night") }
     private val ground: TextureRegion by lazy { Commons.atlas.findRegion("ground") }
     private val greenPipe: TextureRegion by lazy { Commons.atlas.findRegion("pipe_green") }
+    private val scoreText: BigFont by lazy { BigFont() }
 
     private lateinit var chosenBackground: TextureRegion
     private val pipeQueue = PipeQueue()
@@ -50,6 +53,10 @@ class BackgroundActor : BaseActor() {
     private var groundOffset = 0f
     private var groundWidth = 0
     private var pipeHeight = 0f
+    private var pipeSwitched = false
+
+    var score: Int = 0
+        get() = scoreText.value
 
 
     override fun prepare() {
@@ -62,6 +69,7 @@ class BackgroundActor : BaseActor() {
         val pipeRatio = PIPE_WIDTH / greenPipe.regionWidth
         pipeHeight = greenPipe.regionHeight * pipeRatio
 
+        scoreText.setPosition(Gdx.graphics.width / 2f, Gdx.graphics.height - Commons.dpi(81), BaseFont.Align.CENTER)
         reset()
 
         // Ustawienie wielokąta rur do sprawdzania kolizji.
@@ -92,15 +100,18 @@ class BackgroundActor : BaseActor() {
         // losowanie tła
         chosenBackground = if (Random().nextBoolean()) backgroundDay else backgroundNight
 
-        // zresetowanie flag
+        // zresetowanie flag i zmiennych
         started = true
         generatePipes = false
+        pipeSwitched = false
+        scoreText.value = 0
     }
 
     /**
-     * Sprawdza, czy dany aktor koliduje z podłożem lub z jedną z rur.
+     * Sprawdza, czy dany aktor koliduje z podłożem lub z jedną z rur. Ta metoda musi być wywoływana podczas każdej
+     * klatki, w przeciwnym razie punkty nie będą naliczane prawidłowo.
      */
-    fun checkForCollision(actor: BaseActor): Boolean {
+    fun checkForCollision(actor: BirdActor): Boolean {
         val actorPolygon = actor.getPolygon() ?: return false
 
         // sprawdzenie kolizji z podłożem
@@ -120,6 +131,12 @@ class BackgroundActor : BaseActor() {
             return true
         }
 
+        // naliczanie punktów
+        if (!pipeSwitched && nearestPipe.position + PIPE_WIDTH < rightX) {
+            scoreText.value++
+            pipeSwitched = true
+        }
+
         return false
     }
 
@@ -137,6 +154,7 @@ class BackgroundActor : BaseActor() {
                 pipe.toBeRemoved = false
                 computeGap(pipe)
                 pipeQueue.shift()
+                pipeSwitched = false
             }
             pipeQueue.forEach { it.move(moveDistance) }
         }
@@ -179,6 +197,9 @@ class BackgroundActor : BaseActor() {
         // PODŁOGA
         for (i in 0..groundSeries)
             batch?.draw(ground, i * groundWidth - groundOffset, 0f, groundWidth.toFloat(), GROUND_HEIGHT)
+
+        // WYNIK
+        scoreText.draw(batch!!)
     }
 
     override fun drawDebug(shapes: ShapeRenderer?) {

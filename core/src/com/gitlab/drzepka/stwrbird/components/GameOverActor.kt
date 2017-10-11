@@ -12,13 +12,40 @@ import com.gitlab.drzepka.stwrbird.trueWidth
 class GameOverActor : Table(), ActorInterface {
 
     private val gameOverTitle = Image(Commons.atlas.findRegion("title_game_over"))
+    private var boardActor = BoardActor()
+    private var dirty = true
+
+    /** Wynik po ostatniej grze */
+    var score = 0
+        set(value) {
+            field = value
+            dirty = true
+        }
+    /** Najlepszy wynik */
+    var bestScore = 0
+        set(value) {
+            field = value
+            dirty = true
+        }
+    /** Czy wynik po ostatniej grze jest najwyższy */
+    var newBest = false
+        set(value) {
+            field = value
+            dirty = true
+        }
+    /** Przyznany medal */
+    var medal = Medal.NONE
+        set(value) {
+            field = value
+            dirty = true
+        }
 
 
     override fun prepare() {
         setFillParent(true)
         add(gameOverTitle).trueWidth(Commons.dpi(250)).padBottom(Commons.dpi(35))
         row()
-        add(BoardActor()).trueWidth(Commons.dpi(280))
+        add(boardActor).trueWidth(Commons.dpi(280))
 
         debug = true
     }
@@ -32,23 +59,19 @@ class GameOverActor : Table(), ActorInterface {
     inner class BoardActor : Table(), ActorInterface {
 
         private val summaryBoard = TextureRegionDrawable(Commons.atlas.findRegion("summary_board"))
-        private val medal = Image(Commons.atlas.findRegion("medal_bronze"))
-        private val newImage = Image(Commons.atlas.findRegion("new_label"))
+        private val newLabel = Image(Commons.atlas.findRegion("new_label"))
         private val scoreText = MediumFont()
         private val bestScoreText = MediumFont()
+        private var medal: Image? = null
 
         init {
             background = summaryBoard
 
-            medal.trueWidth(Commons.dpi(55))
-            medal.setPosition(Commons.dpi(31), Commons.dpi(35))
-            newImage.trueWidth(Commons.dpi(34))
-            newImage.setPosition(Commons.dpi(174), Commons.dpi(53))
+            newLabel.trueWidth(Commons.dpi(34))
+            newLabel.setPosition(Commons.dpi(174), Commons.dpi(53))
 
             scoreText.setPosition(Commons.dpi(251), Commons.dpi(79), BaseFont.Align.RIGHT)
-            scoreText.value = 1234
             bestScoreText.setPosition(Commons.dpi(251), Commons.dpi(29), BaseFont.Align.RIGHT)
-            bestScoreText.value = 99
         }
 
         override fun prepare() = Unit
@@ -56,12 +79,32 @@ class GameOverActor : Table(), ActorInterface {
         override fun reset() = Unit
 
         override fun draw(batch: Batch?, parentAlpha: Float) {
-            super.draw(batch, parentAlpha)
+            super.draw(batch!!, parentAlpha)
+            if (dirty) refresh()
+
             applyTransform(batch, computeTransform())
-            medal.draw(batch!!, 1f)
-            newImage.draw(batch, 1f)
+            medal?.draw(batch, 1f)
             scoreText.draw(batch)
             bestScoreText.draw(batch)
+            if (newBest) newLabel.draw(batch, 1f)
         }
+
+        private fun refresh() {
+            dirty = false
+            scoreText.value = score
+            bestScoreText.value = bestScore
+
+            val medalName = this@GameOverActor.medal
+            medal = if (medalName != Medal.NONE)
+                Image(Commons.atlas.findRegion("medal_" + medalName.toString().toLowerCase()))
+            else
+                null
+            medal?.trueWidth(Commons.dpi(55))
+            medal?.setPosition(Commons.dpi(31), Commons.dpi(35))
+        }
+    }
+
+    enum class Medal {
+        NONE, BRONZE, SILVER, GOLD, PLATINIUM
     }
 }

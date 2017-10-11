@@ -65,16 +65,15 @@ abstract class BaseFont(
     private fun update() {
         var tmpVal = value
         val list = ArrayList<Int>()
-        while (tmpVal != 0) {
+        do {
             val digit = tmpVal % 10
             list.add(digit * (digitWidth + digitSpacing))
             tmpVal /= 10
-        }
+        } while (tmpVal != 0)
 
         // konwersja kolejki
         queue = list.toTypedArray()
-        if (align != Align.RIGHT)
-            queue.reverse()
+        queue.reverse()
 
         // ustawienie odległości między POCZĄTKAMI znaków
         delta = fontSize + spacing
