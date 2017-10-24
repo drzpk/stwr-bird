@@ -14,7 +14,7 @@ class GameScreen : BaseScreen() {
     private var mode = Mode.TAP_TO_PLAY
 
     private val tapToPlayOverlay = PlayGameOverlay()
-    private val gameOverActor = GameOverActor()
+    private val gameOverActor = GameOverActor(this)
     private val backgroundActor = BackgroundActor()
     private val birdActor = BirdActor()
 
@@ -41,14 +41,10 @@ class GameScreen : BaseScreen() {
     }
 
     override fun render(delta: Float) {
-        if (Gdx.input.justTouched() && mode == Mode.TAP_TO_PLAY)
-            setMode(Mode.GAME)
-
         if (Gdx.input.justTouched()) {
             @Suppress("NON_EXHAUSTIVE_WHEN")
             when (mode) {
                 Mode.TAP_TO_PLAY -> setMode(Mode.GAME)
-                Mode.GAME_OVER -> setMode(Mode.TAP_TO_PLAY)
             }
         }
 
@@ -63,7 +59,7 @@ class GameScreen : BaseScreen() {
         stage.draw()
     }
 
-    private fun setMode(mode: Mode) {
+    fun setMode(mode: Mode) {
         when (mode) {
             GameScreen.Mode.FIRST -> TODO()
             GameScreen.Mode.TAP_TO_PLAY -> {
@@ -110,7 +106,7 @@ class GameScreen : BaseScreen() {
         this.mode = mode
     }
 
-    private enum class Mode {
+    enum class Mode {
         FIRST,
         TAP_TO_PLAY,
         GAME,

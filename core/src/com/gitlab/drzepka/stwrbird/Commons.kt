@@ -8,6 +8,8 @@ object Commons {
     val SPEED = dpi(100)
     /** Atlas tekstur */
     val atlas: TextureAtlas by lazy { TextureAtlas(Gdx.files.internal("texture_atlas.atlas")) }
+    /** Interfejs Androida */
+    val androidInterface: AndroidInterface = StwrBird.androidInterface!!
     /**
      * Ustawia tryb debugowania.
      */

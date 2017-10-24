@@ -7,12 +7,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.gitlab.drzepka.stwrbird.Commons
 import com.gitlab.drzepka.stwrbird.font.BaseFont
 import com.gitlab.drzepka.stwrbird.font.MediumFont
+import com.gitlab.drzepka.stwrbird.screen.GameScreen
 import com.gitlab.drzepka.stwrbird.trueWidth
 
-class GameOverActor : Table(), ActorInterface {
+class GameOverActor(private val gameScreen: GameScreen) : Table(), ActorInterface {
 
     private val gameOverTitle = Image(Commons.atlas.findRegion("title_game_over"))
-    private var boardActor = BoardActor()
+    private val boardActor = BoardActor()
+    private val controlsActor = ControlsActor()
     private var dirty = true
 
     /** Wynik po ostatniej grze */
@@ -46,15 +48,21 @@ class GameOverActor : Table(), ActorInterface {
         add(gameOverTitle).trueWidth(Commons.dpi(250)).padBottom(Commons.dpi(35))
         row()
         add(boardActor).trueWidth(Commons.dpi(280))
+        row().spaceTop(Commons.dpi(20))
+
+        add(controlsActor).trueWidth(Commons.dpi(280))
+        controlsActor.onClickListener = {
+            when (it) {
+                ControlsActor.Button.PLAY -> gameScreen.setMode(GameScreen.Mode.TAP_TO_PLAY)
+                ControlsActor.Button.SCORES ->
+                    Commons.androidInterface.toast("ta funkcja nie została jeszcze zaimplementowana", false)
+            }
+        }
 
         debug = true
     }
 
     override fun reset() = Unit
-
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
-    }
 
     inner class BoardActor : Table(), ActorInterface {
 
@@ -87,6 +95,7 @@ class GameOverActor : Table(), ActorInterface {
             scoreText.draw(batch)
             bestScoreText.draw(batch)
             if (newBest) newLabel.draw(batch, 1f)
+            resetTransform(batch)
         }
 
         private fun refresh() {

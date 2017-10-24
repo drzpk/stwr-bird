@@ -7,12 +7,17 @@ import com.gitlab.drzepka.stwrbird.screen.BaseScreen
 import com.gitlab.drzepka.stwrbird.screen.GameScreen
 import java.util.*
 
-class StwrBird : ApplicationAdapter() {
+class StwrBird private constructor() : ApplicationAdapter() {
     //private val FPS = 60f
     //private val frameTime = (1000f / FPS).toLong()
 
     private val screenStack = Stack<BaseScreen>()
     private var lastFrame = 0L
+
+
+    constructor(androidIface: AndroidInterface) : this() {
+        androidInterface = androidIface
+    }
 
     override fun create() {
 
@@ -100,5 +105,10 @@ class StwrBird : ApplicationAdapter() {
         }
 
         Commons.atlas.dispose()
+    }
+
+    companion object {
+        var androidInterface: AndroidInterface? = null
+            private set
     }
 }
