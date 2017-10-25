@@ -153,7 +153,7 @@ class BirdActor : BaseActor() {
     }
 
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
-        if (started) {
+        if (started && Gdx.input.justTouched()) {
             speed = PUSH_SPEED
         }
         return null
