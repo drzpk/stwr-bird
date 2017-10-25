@@ -21,13 +21,13 @@ class BackgroundActor : BaseActor() {
 
     companion object {
         /** Wysokość podłoża */
-        internal val GROUND_HEIGHT = Commons.dpi(80)
+        internal val GROUND_HEIGHT = Commons.dpi(107)
     }
 
     /** Szerokość rury */
-    private val PIPE_WIDTH = Commons.dpi(65)
+    private val PIPE_WIDTH = Commons.dpi(79)
     /** Odległość między rurami */
-    private val PIPE_DISTANCE = Commons.dpi(120)
+    private val PIPE_DISTANCE = Commons.dpi(140)
     /** Wysokość przestrzeni między rurami */
     private val PIPE_GAP = Commons.dpi(125)
     /** Minimalna wysokość widocznej częsci rury */
