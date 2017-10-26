@@ -55,7 +55,7 @@ class GameOverActor(private val gameScreen: GameScreen) : Table(), ActorInterfac
             when (it) {
                 ControlsActor.Button.PLAY -> gameScreen.setMode(GameScreen.Mode.TAP_TO_PLAY)
                 ControlsActor.Button.SCORES ->
-                    Commons.androidInterface.toast("ta funkcja nie została jeszcze zaimplementowana", false)
+                    Commons.androidInterface.toast("Najlepsze wyniki nie są w tej chwili dostępne", false)
             }
         }
 
