@@ -1,6 +1,7 @@
 package com.gitlab.drzepka.stwrbird.screen
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.gitlab.drzepka.stwrbird.Audio
@@ -11,6 +12,9 @@ import com.gitlab.drzepka.stwrbird.components.PlayGameOverlay
 
 class GameScreen : BaseScreen() {
 
+    /** Czas trwania błysku po przegranej grze w sekundach */
+    private val FLASH_DURATION = 0.21f
+
     private val stage = Stage(ScreenViewport())
     private var mode = Mode.TAP_TO_PLAY
 
@@ -18,8 +22,11 @@ class GameScreen : BaseScreen() {
     private val gameOverActor = GameOverActor(this)
     private val backgroundActor = BackgroundActor()
     private val birdActor = BirdActor()
+    private val shapeRenderer = ShapeRenderer()
 
     private var bestScore = 0
+    private var flashAnimation = false
+    private var flashStatus = 0f
 
     override fun create() {
         Gdx.input.inputProcessor = stage
@@ -58,6 +65,19 @@ class GameScreen : BaseScreen() {
         }
 
         stage.draw()
+
+        // RYSOWANIE BŁYSKU
+        if (flashAnimation) {
+            val alpha = ((FLASH_DURATION / 2) - Math.abs(flashStatus)) / (FLASH_DURATION / 2)
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+            shapeRenderer.setColor(1f, 1f, 1f, alpha)
+            shapeRenderer.rect(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+            shapeRenderer.end()
+
+            flashStatus += delta
+            if (flashStatus > FLASH_DURATION / 2)
+                flashAnimation = false
+        }
     }
 
     fun setMode(mode: Mode) {
@@ -83,6 +103,10 @@ class GameScreen : BaseScreen() {
                 backgroundActor.generatePipes = false
                 birdActor.started = false
 
+                // włączenie błysku
+                flashAnimation = true
+                flashStatus = -(FLASH_DURATION / 2)
+
                 // obliczenie wyniku i przyznanie medalu
                 val score = backgroundActor.score
                 val medal = when {
@@ -98,7 +122,8 @@ class GameScreen : BaseScreen() {
                     preferences.flush()
                     bestScore = score
                     true
-                } else
+                }
+                else
                     false
                 gameOverActor.score = score
                 gameOverActor.bestScore = bestScore
