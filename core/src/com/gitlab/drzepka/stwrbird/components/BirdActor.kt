@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.Commons
 import java.util.*
 
@@ -155,6 +156,8 @@ class BirdActor : BaseActor() {
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
         if (started && Gdx.input.justTouched()) {
             speed = PUSH_SPEED
+            // dźwięk machania skrzydłami
+            Audio.wing.play(1.0f)
         }
         return null
     }

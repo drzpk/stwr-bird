@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Polygon
+import com.badlogic.gdx.utils.Timer
+import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.Commons
 import com.gitlab.drzepka.stwrbird.font.BaseFont
 import com.gitlab.drzepka.stwrbird.font.BigFont
@@ -116,8 +118,11 @@ class BackgroundActor : BaseActor() {
 
         // sprawdzenie kolizji z podłożem
         val lowest = actorPolygon.transformedVertices?.filterIndexed { index, _ -> index % 2 != 0 }?.min()
-        if (lowest != null && lowest <= GROUND_HEIGHT)
+        if (lowest != null && lowest <= GROUND_HEIGHT) {
+            // dźwięk uderzenia
+            Audio.hit.play()
             return true
+        }
 
         // sprawdzenie kolizji tylko z najbliższą rurą
         val xVertices = actorPolygon.transformedVertices?.filterIndexed { index, _ -> index % 2 == 0 }!!
@@ -128,6 +133,13 @@ class BackgroundActor : BaseActor() {
         if (Intersector.overlapConvexPolygons(actorPolygon, upperPipePolygon)
                 || Intersector.overlapConvexPolygons(actorPolygon, lowerPipePolygon)) {
             // kolizja ptaka z rurą
+            // dźwięk uderzenia i spadania
+            Audio.hit.play()
+            Timer.schedule(object : Timer.Task() {
+                override fun run() {
+                    Audio.fall.play()
+                }
+            }, 0.4f)
             return true
         }
 
@@ -135,6 +147,8 @@ class BackgroundActor : BaseActor() {
         if (!pipeSwitched && nearestPipe.position + PIPE_WIDTH < rightX) {
             scoreText.value++
             pipeSwitched = true
+            // dźwięk zdobywania punktów
+            Audio.point.play()
         }
 
         return false

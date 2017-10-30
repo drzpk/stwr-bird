@@ -105,6 +105,7 @@ class StwrBird private constructor() : ApplicationAdapter() {
         }
 
         Commons.atlas.dispose()
+        Audio.dispose()
     }
 
     companion object {

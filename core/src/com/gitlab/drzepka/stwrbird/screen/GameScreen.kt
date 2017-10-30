@@ -3,6 +3,7 @@ package com.gitlab.drzepka.stwrbird.screen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.components.BackgroundActor
 import com.gitlab.drzepka.stwrbird.components.BirdActor
 import com.gitlab.drzepka.stwrbird.components.GameOverActor
@@ -67,6 +68,9 @@ class GameScreen : BaseScreen() {
                 backgroundActor.reset()
                 gameOverActor.remove()
                 tapToPlayOverlay.isVisible = true
+
+                // dźwięk machnięcia
+                Audio.swoosh.play()
             }
             GameScreen.Mode.GAME -> {
                 tapToPlayOverlay.isVisible = false
