@@ -59,7 +59,7 @@ class GameOverActor(private val gameScreen: GameScreen) : Table(), ActorInterfac
             }
         }
 
-        debug = true
+        debug = Commons.DEBUG
     }
 
     override fun reset() = Unit

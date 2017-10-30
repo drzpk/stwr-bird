@@ -1,6 +1,7 @@
 package com.gitlab.drzepka.stwrbird.screen
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
@@ -69,10 +70,12 @@ class GameScreen : BaseScreen() {
         // RYSOWANIE BŁYSKU
         if (flashAnimation) {
             val alpha = ((FLASH_DURATION / 2) - Math.abs(flashStatus)) / (FLASH_DURATION / 2)
+            Gdx.gl.glEnable(GL20.GL_BLEND)
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
             shapeRenderer.setColor(1f, 1f, 1f, alpha)
             shapeRenderer.rect(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
             shapeRenderer.end()
+            Gdx.gl.glDisable(GL20.GL_BLEND)
 
             flashStatus += delta
             if (flashStatus > FLASH_DURATION / 2)

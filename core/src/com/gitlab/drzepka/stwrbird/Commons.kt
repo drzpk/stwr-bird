@@ -13,7 +13,7 @@ object Commons {
     /**
      * Ustawia tryb debugowania.
      */
-    val DEBUG = true
+    val DEBUG = false
 
     /**
      * Konwertuje DPI na piksele.
