@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 
 object Commons {
     /** Prędkość obiektów w pikselach na sekundę */
-    val SPEED = dpi(100)
+    val SPEED = dpi(115)
     /** Atlas tekstur */
     val atlas: TextureAtlas by lazy { TextureAtlas(Gdx.files.internal("texture_atlas.atlas")) }
     /** Interfejs Androida */

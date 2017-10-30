@@ -31,7 +31,7 @@ class BackgroundActor : BaseActor() {
     /** Odległość między rurami */
     private val PIPE_DISTANCE = Commons.dpi(140)
     /** Wysokość przestrzeni między rurami */
-    private val PIPE_GAP = Commons.dpi(125)
+    private val PIPE_GAP = Commons.dpi(135)
     /** Minimalna wysokość widocznej częsci rury */
     private val MIN_PIPE_HEIGHT = Commons.dpi(50)
 

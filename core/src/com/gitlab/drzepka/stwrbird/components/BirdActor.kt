@@ -19,9 +19,9 @@ class BirdActor : BaseActor() {
     /** Czas wyświetlania jednej klatki animacji w sekundach */
     private val BIRD_FRAME_DURATION = 0.2f
     /** Siła grawitacji w pikselach na sekundę */
-    private val GRAVITY_DELTA = Commons.dpi(12.07f)
+    private val GRAVITY_DELTA = Commons.dpi(13.1f)
     /** Prędkość ptaka po kliknięciu w pikselach na sekundę */
-    private val PUSH_SPEED = Commons.dpi(5.32f)
+    private val PUSH_SPEED = Commons.dpi(5.62f)
     /** Rozmiar ptaka (szerokość) w pikselach */
     private val BIRD_SIZE = Commons.dpi(38)
     /** Współczynnik określający stosunek "pudełka kolizji" do rozmiaru ptaka */
