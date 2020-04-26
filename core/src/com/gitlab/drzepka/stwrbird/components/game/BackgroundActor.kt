@@ -1,6 +1,4 @@
-@file:Suppress("ConstantConditionIf")
-
-package com.gitlab.drzepka.stwrbird.components
+package com.gitlab.drzepka.stwrbird.components.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -11,10 +9,14 @@ import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.utils.Timer
 import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.Commons
+import com.gitlab.drzepka.stwrbird.components.BaseActor
 import com.gitlab.drzepka.stwrbird.font.BaseFont
 import com.gitlab.drzepka.stwrbird.font.BigFont
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 /**
  * Aktor obsługujący tło i rury.
@@ -57,15 +59,15 @@ class BackgroundActor : BaseActor() {
     private var pipeHeight = 0f
     private var pipeSwitched = false
 
-    var score: Int = 0
+    val score: Int
         get() = scoreText.value
 
 
     override fun prepare() {
         // obliczanie długości i liczby podłóg
         val ratio = ground.regionWidth.toFloat() / ground.regionHeight
-        groundWidth = Math.round(ratio * GROUND_HEIGHT)
-        groundSeries = Math.ceil(Gdx.app.graphics.width.toDouble() / groundWidth).toInt()
+        groundWidth = (ratio * GROUND_HEIGHT).roundToInt()
+        groundSeries = ceil(Gdx.app.graphics.width.toDouble() / groundWidth).toInt()
 
         // obliczenie maksymalnej długości rury
         val pipeRatio = PIPE_WIDTH / greenPipe.regionWidth
@@ -88,7 +90,7 @@ class BackgroundActor : BaseActor() {
 
     override fun reset() {
         // wypełnienie kolejki rurami
-        val amount = Math.ceil(Gdx.app.graphics.width * 2f / (PIPE_WIDTH + PIPE_DISTANCE).toDouble()).toInt()
+        val amount = ceil(Gdx.app.graphics.width * 2f / (PIPE_WIDTH + PIPE_DISTANCE).toDouble()).toInt()
         var position = Gdx.app.graphics.width * 1.5f
         val list = ArrayList<Pipe>()
         for (i in 0 until amount) {
@@ -127,7 +129,7 @@ class BackgroundActor : BaseActor() {
         // sprawdzenie kolizji tylko z najbliższą rurą
         val xVertices = actorPolygon.transformedVertices?.filterIndexed { index, _ -> index % 2 == 0 }!!
         val rightX = xVertices.max()!!
-        val nearestPipe = pipeQueue.minBy { Math.abs(rightX - it.position) }!!
+        val nearestPipe = pipeQueue.minBy { abs(rightX - it.position) }!!
         upperPipePolygon.setPosition(nearestPipe.position, nearestPipe.gapPoint + PIPE_GAP)
         lowerPipePolygon.setPosition(nearestPipe.position, nearestPipe.gapPoint - pipeHeight)
         if (Intersector.overlapConvexPolygons(actorPolygon, upperPipePolygon)

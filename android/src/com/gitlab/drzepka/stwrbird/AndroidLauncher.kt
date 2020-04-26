@@ -7,7 +7,7 @@ import android.widget.Toast
 import com.badlogic.gdx.backends.android.AndroidApplication
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
 
-class AndroidLauncher : AndroidApplication(), AndroidInterface {
+class AndroidLauncher : AndroidApplication(), Android {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,14 +1,15 @@
-package com.gitlab.drzepka.stwrbird.components
+package com.gitlab.drzepka.stwrbird.components.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.gitlab.drzepka.stwrbird.Commons
+import com.gitlab.drzepka.stwrbird.components.GameComponent
 import com.gitlab.drzepka.stwrbird.inRange
 import com.gitlab.drzepka.stwrbird.trueWidth
 
-class ControlsActor : Table(), ActorInterface {
+class ControlsActor : Table(), GameComponent {
 
     private val playButton = Image(Commons.atlas.findRegion("play_button"))
     private val scoresButton = Image(Commons.atlas.findRegion("scores_button"))

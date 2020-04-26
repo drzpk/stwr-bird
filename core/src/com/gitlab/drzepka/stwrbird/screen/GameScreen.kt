@@ -6,10 +6,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.gitlab.drzepka.stwrbird.Audio
-import com.gitlab.drzepka.stwrbird.components.BackgroundActor
-import com.gitlab.drzepka.stwrbird.components.BirdActor
-import com.gitlab.drzepka.stwrbird.components.GameOverActor
-import com.gitlab.drzepka.stwrbird.components.PlayGameOverlay
+import com.gitlab.drzepka.stwrbird.components.game.BackgroundActor
+import com.gitlab.drzepka.stwrbird.components.game.BirdActor
+import com.gitlab.drzepka.stwrbird.components.game.GameOverActor
+import com.gitlab.drzepka.stwrbird.components.game.PlayGameOverlay
+import kotlin.math.abs
 
 class GameScreen : BaseScreen() {
 
@@ -69,7 +70,7 @@ class GameScreen : BaseScreen() {
 
         // RYSOWANIE BŁYSKU
         if (flashAnimation) {
-            val alpha = ((FLASH_DURATION / 2) - Math.abs(flashStatus)) / (FLASH_DURATION / 2)
+            val alpha = ((FLASH_DURATION / 2) - abs(flashStatus)) / (FLASH_DURATION / 2)
             Gdx.gl.glEnable(GL20.GL_BLEND)
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
             shapeRenderer.setColor(1f, 1f, 1f, alpha)
@@ -85,8 +86,8 @@ class GameScreen : BaseScreen() {
 
     fun setMode(mode: Mode) {
         when (mode) {
-            GameScreen.Mode.FIRST -> TODO()
-            GameScreen.Mode.TAP_TO_PLAY -> {
+            Mode.FIRST -> TODO()
+            Mode.TAP_TO_PLAY -> {
                 birdActor.reset()
                 backgroundActor.reset()
                 gameOverActor.remove()
@@ -95,13 +96,13 @@ class GameScreen : BaseScreen() {
                 // dźwięk machnięcia
                 Audio.swoosh.play()
             }
-            GameScreen.Mode.GAME -> {
+            Mode.GAME -> {
                 tapToPlayOverlay.isVisible = false
                 backgroundActor.generatePipes = true
                 birdActor.started = true
                 gameOverActor.remove()
             }
-            GameScreen.Mode.GAME_OVER -> {
+            Mode.GAME_OVER -> {
                 backgroundActor.started = false
                 backgroundActor.generatePipes = false
                 birdActor.started = false

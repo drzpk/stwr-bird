@@ -9,11 +9,11 @@ object Commons {
     /** Atlas tekstur */
     val atlas: TextureAtlas by lazy { TextureAtlas(Gdx.files.internal("texture_atlas.atlas")) }
     /** Interfejs Androida */
-    val androidInterface: AndroidInterface = StwrBird.androidInterface!!
+    val android: Android = StwrBird.android!!
     /**
      * Ustawia tryb debugowania.
      */
-    val DEBUG = false
+    const val DEBUG = false
 
     /**
      * Konwertuje DPI na piksele.

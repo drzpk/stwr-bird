@@ -1,6 +1,6 @@
 @file:Suppress("ConstantConditionIf")
 
-package com.gitlab.drzepka.stwrbird.components
+package com.gitlab.drzepka.stwrbird.components.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Animation
@@ -12,7 +12,11 @@ import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.Commons
+import com.gitlab.drzepka.stwrbird.components.BaseActor
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sin
 
 class BirdActor : BaseActor() {
 
@@ -121,7 +125,7 @@ class BirdActor : BaseActor() {
 
         if (!started && swingMode) {
             // animacja kołysania się ptaka
-            val height = Gdx.graphics.height / 2 + (Math.sin(stateTime.toDouble() * 6.4f) * BIRD_SWING)
+            val height = Gdx.graphics.height / 2 + (sin(stateTime.toDouble() * 6.4f) * BIRD_SWING)
             bird.y = height.toFloat()
             return
         }
@@ -129,16 +133,16 @@ class BirdActor : BaseActor() {
         // prędkość i położenie
         speed -= GRAVITY_DELTA * delta
         if (speed < -MAX_DOWN_SPEED) speed = -MAX_DOWN_SPEED
-        bird.y = Math.max(BackgroundActor.GROUND_HEIGHT, bird.y + speed)
+        bird.y = max(BackgroundActor.GROUND_HEIGHT, bird.y + speed)
         polygon.setPosition(bird.x + collisionBoxXOffset, bird.y + collisionBoxYOffset)
         polygon.setOrigin(bird.originX, bird.originY)
 
         // obrót
         if (speed >= 0) {
-            bird.rotation = Math.min(bird.rotation + ROTATION_DELTA * delta, MAX_UP_ANGLE)
+            bird.rotation = min(bird.rotation + ROTATION_DELTA * delta, MAX_UP_ANGLE)
         }
         else {
-            bird.rotation = Math.max(bird.rotation + speed * 0.26f, -90f)
+            bird.rotation = max(bird.rotation + speed * 0.26f, -90f)
         }
         polygon.rotation = bird.rotation
     }

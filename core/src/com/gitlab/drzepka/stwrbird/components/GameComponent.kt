@@ -2,7 +2,7 @@ package com.gitlab.drzepka.stwrbird.components
 
 import com.badlogic.gdx.math.Polygon
 
-interface ActorInterface {
+interface GameComponent {
 
     /** Wywoływana po utworzeniu obiektu i ustawieniu pól */
     fun prepare() = Unit

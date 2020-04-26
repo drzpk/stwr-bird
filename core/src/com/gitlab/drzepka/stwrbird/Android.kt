@@ -1,6 +1,6 @@
 package com.gitlab.drzepka.stwrbird
 
-interface AndroidInterface {
+interface Android {
 
     /**
      * Wyświetla toast.

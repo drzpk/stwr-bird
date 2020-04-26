@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.gitlab.drzepka.stwrbird.screen.BaseScreen
 import com.gitlab.drzepka.stwrbird.screen.GameScreen
 import java.util.*
+import kotlin.system.exitProcess
 
 class StwrBird private constructor() : ApplicationAdapter() {
     //private val FPS = 60f
@@ -15,8 +16,8 @@ class StwrBird private constructor() : ApplicationAdapter() {
     private var lastFrame = 0L
 
 
-    constructor(androidIface: AndroidInterface) : this() {
-        androidInterface = androidIface
+    constructor(androidIface: Android) : this() {
+        android = androidIface
     }
 
     override fun create() {
@@ -92,7 +93,7 @@ class StwrBird private constructor() : ApplicationAdapter() {
         else {
             // brak ekranów, zakończ aplikację
             dispose()
-            System.exit(0)
+            exitProcess(0)
         }
     }
 
@@ -109,7 +110,7 @@ class StwrBird private constructor() : ApplicationAdapter() {
     }
 
     companion object {
-        var androidInterface: AndroidInterface? = null
+        var android: Android? = null
             private set
     }
 }
