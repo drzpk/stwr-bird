@@ -8,6 +8,7 @@ import com.gitlab.drzepka.stwrbird.Commons
 import com.gitlab.drzepka.stwrbird.components.GameComponent
 import com.gitlab.drzepka.stwrbird.font.BaseFont
 import com.gitlab.drzepka.stwrbird.font.MediumFont
+import com.gitlab.drzepka.stwrbird.model.Medal
 import com.gitlab.drzepka.stwrbird.screen.GameScreen
 import com.gitlab.drzepka.stwrbird.trueWidth
 import java.util.*
@@ -116,9 +117,5 @@ class GameOverActor(private val gameScreen: GameScreen) : Table(), GameComponent
             medal?.trueWidth(Commons.dpi(55))
             medal?.setPosition(Commons.dpi(31), Commons.dpi(35))
         }
-    }
-
-    enum class Medal {
-        NONE, BRONZE, SILVER, GOLD, PLATINIUM
     }
 }

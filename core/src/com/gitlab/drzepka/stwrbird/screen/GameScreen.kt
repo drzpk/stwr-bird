@@ -3,13 +3,12 @@ package com.gitlab.drzepka.stwrbird.screen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.components.game.BackgroundActor
 import com.gitlab.drzepka.stwrbird.components.game.BirdActor
 import com.gitlab.drzepka.stwrbird.components.game.GameOverActor
 import com.gitlab.drzepka.stwrbird.components.game.PlayGameOverlay
+import com.gitlab.drzepka.stwrbird.model.Medal
 import kotlin.math.abs
 
 class GameScreen : BaseScreen() {
@@ -17,7 +16,6 @@ class GameScreen : BaseScreen() {
     /** Czas trwania błysku po przegranej grze w sekundach */
     private val FLASH_DURATION = 0.21f
 
-    private val stage = Stage(ScreenViewport())
     private var mode = Mode.TAP_TO_PLAY
 
     private val tapToPlayOverlay = PlayGameOverlay()
@@ -114,11 +112,11 @@ class GameScreen : BaseScreen() {
                 // obliczenie wyniku i przyznanie medalu
                 val score = backgroundActor.score
                 val medal = when {
-                    score > 100 -> GameOverActor.Medal.PLATINIUM
-                    score > 70 -> GameOverActor.Medal.GOLD
-                    score > 30 -> GameOverActor.Medal.SILVER
-                    score > 15 -> GameOverActor.Medal.BRONZE
-                    else -> GameOverActor.Medal.NONE
+                    score > 100 -> Medal.PLATINIUM
+                    score > 70 -> Medal.GOLD
+                    score > 30 -> Medal.SILVER
+                    score > 15 -> Medal.BRONZE
+                    else -> Medal.NONE
                 }
                 gameOverActor.newBest = if (score > bestScore) {
                     val preferences = Gdx.app.getPreferences("stwr-bird")

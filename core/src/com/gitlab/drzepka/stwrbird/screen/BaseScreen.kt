@@ -2,11 +2,15 @@ package com.gitlab.drzepka.stwrbird.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
+import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.gitlab.drzepka.stwrbird.StwrBird
 
 abstract class BaseScreen : Screen {
 
     lateinit var stwrBird: StwrBird
+    protected val stage = Stage(ScreenViewport())
+
 
     var active = false
     var toBeClosed = false

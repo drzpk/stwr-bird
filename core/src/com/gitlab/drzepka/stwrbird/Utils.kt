@@ -1,5 +1,9 @@
 package com.gitlab.drzepka.stwrbird
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
@@ -36,3 +40,16 @@ fun <T : Widget> T.trueWidth(width: Float, updateOrigin: Boolean = false): T {
  */
 infix fun Number.inRange(pair: Pair<Number, Number>): Boolean =
         this.toFloat() >= pair.first.toFloat() && this.toFloat() <= pair.second.toFloat()
+
+fun loadBitmapFont(ttfFontPath: String, fontSizePx: Int): BitmapFont {
+    val internal = Gdx.files.internal(ttfFontPath)
+    val parameter = FreeTypeFontGenerator.FreeTypeFontParameter()
+    parameter.size = fontSizePx
+    parameter.color = Color(0f, 0f, 0f, 1f)
+
+    val generator = FreeTypeFontGenerator(internal)
+    val generated = generator.generateFont(parameter)
+    generator.dispose()
+
+    return generated
+}
