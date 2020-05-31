@@ -10,7 +10,7 @@ import com.gitlab.drzepka.stwrbird.model.Medal
 import com.gitlab.drzepka.stwrbird.model.Score
 import java.util.*
 
-class ScoreElementLayout(private val score: Score) : Table() {
+class ScoreElementLayout(pos: Int, score: Score) : Table() {
 
     private val positionFont = MediumFont()
     private val scoreFont = MediumFont()
@@ -21,9 +21,9 @@ class ScoreElementLayout(private val score: Score) : Table() {
         pad(PADDING)
         add().width(WIDTH + PADDING).height(HEIGHT + PADDING)
 
-        positionFont.value = Random().nextInt(20)
-        scoreFont.value = 12
-        playTimeFont.value = 4567
+        positionFont.value = pos
+        scoreFont.value = score.score
+        playTimeFont.value = score.playTime
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {

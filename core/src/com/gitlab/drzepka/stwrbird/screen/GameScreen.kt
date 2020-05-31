@@ -3,12 +3,16 @@ package com.gitlab.drzepka.stwrbird.screen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.MathUtils.floor
 import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.components.game.BackgroundActor
 import com.gitlab.drzepka.stwrbird.components.game.BirdActor
 import com.gitlab.drzepka.stwrbird.components.game.GameOverActor
 import com.gitlab.drzepka.stwrbird.components.game.PlayGameOverlay
+import com.gitlab.drzepka.stwrbird.data.ScoreData
 import com.gitlab.drzepka.stwrbird.model.Medal
+import com.gitlab.drzepka.stwrbird.model.Score
+import java.util.*
 import kotlin.math.abs
 
 class GameScreen : BaseScreen() {
@@ -27,12 +31,13 @@ class GameScreen : BaseScreen() {
     private var bestScore = 0
     private var flashAnimation = false
     private var flashStatus = 0f
+    private var gameStartTime: Date? = null
 
     override fun create() {
         super.create()
 
         // załadowanie najlepszego wyniku
-        bestScore = Gdx.app.getPreferences("stwr-bird").getInteger("best_score", 0)
+        bestScore = ScoreData.getHighestScores().firstOrNull()?.score ?: 0
 
         backgroundActor.setSize(1f, 1f)
         backgroundActor.prepare()
@@ -49,12 +54,8 @@ class GameScreen : BaseScreen() {
     }
 
     override fun render(delta: Float) {
-        if (Gdx.input.justTouched()) {
-            @Suppress("NON_EXHAUSTIVE_WHEN")
-            when (mode) {
-                Mode.TAP_TO_PLAY -> setMode(Mode.GAME)
-            }
-        }
+        if (Gdx.input.justTouched() && mode == Mode.TAP_TO_PLAY)
+            setMode(Mode.GAME)
 
         stage.act(delta)
 
@@ -62,6 +63,7 @@ class GameScreen : BaseScreen() {
         if (mode == Mode.GAME && backgroundActor.checkForCollision(birdActor)) {
             // kolizja - koniec gry
             setMode(Mode.GAME_OVER)
+
         }
 
         stage.draw()
@@ -98,9 +100,12 @@ class GameScreen : BaseScreen() {
                 tapToPlayOverlay.isVisible = false
                 backgroundActor.generatePipes = true
                 birdActor.started = true
+                gameStartTime = Date()
                 gameOverActor.remove()
             }
             Mode.GAME_OVER -> {
+                val gameEndTime = Date()
+
                 backgroundActor.started = false
                 backgroundActor.generatePipes = false
                 birdActor.started = false
@@ -118,15 +123,17 @@ class GameScreen : BaseScreen() {
                     score > 15 -> Medal.BRONZE
                     else -> Medal.NONE
                 }
+
+                if (score > 0) {
+                    val playTime = floor((gameEndTime.time - gameStartTime!!.time) / 1000f + 0.5f)
+                    ScoreData.addScore(Score(score, playTime, medal))
+                }
+
                 gameOverActor.newBest = if (score > bestScore) {
-                    val preferences = Gdx.app.getPreferences("stwr-bird")
-                    preferences.putInteger("best_score", score)
-                    preferences.flush()
                     bestScore = score
                     true
-                }
-                else
-                    false
+                } else false
+
                 gameOverActor.score = score
                 gameOverActor.bestScore = bestScore
                 gameOverActor.medal = medal

@@ -6,10 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.gitlab.drzepka.stwrbird.Commons
 import com.gitlab.drzepka.stwrbird.components.scoreboard.ScoreElementLayout
+import com.gitlab.drzepka.stwrbird.data.ScoreData
 import com.gitlab.drzepka.stwrbird.loadBitmapFont
-import com.gitlab.drzepka.stwrbird.model.Medal
-import com.gitlab.drzepka.stwrbird.model.Score
-import java.util.*
 
 class ScoreboardScreen : BaseScreen() {
 
@@ -29,7 +27,7 @@ class ScoreboardScreen : BaseScreen() {
         titleStyle.font = loadBitmapFont("fonts/FlappyBirdy.ttf", 150)
         title = Label("Highest scores", titleStyle)
         mainContainer.add(title)
-        mainContainer.row()
+        mainContainer.row().expandY()
 
         board = VerticalGroup()
         getScoreActors().forEach { board.addActor(it) }
@@ -47,21 +45,8 @@ class ScoreboardScreen : BaseScreen() {
         stage.draw()
     }
 
-    override fun dispose() {
-    }
+    override fun dispose() = Unit
 
-    private fun getScoreActors(): List<Actor> = getHighestScores().map { ScoreElementLayout(it) }
-
-    private fun getHighestScores(): List<Score> {
-        // todo: Score database
-
-        return (10 downTo 0).map {
-            val medal = try {
-                Medal.values()[10 - it]
-            } catch (ignored: Exception) {
-                null
-            }
-            Score("test player", it * 10, medal, Date())
-        }.toList()
-    }
+    private fun getScoreActors(): List<Actor> =
+            ScoreData.getHighestScores().mapIndexed {i, it -> ScoreElementLayout(i + 1, it) }
 }
