@@ -20,7 +20,7 @@ class ScoreboardScreen : BaseScreen() {
     private lateinit var board: VerticalGroup
 
     override fun create() {
-        Gdx.input.inputProcessor = stage
+        super.create()
 
         backgroundImage.setSize(Gdx.app.graphics.width.toFloat(), Gdx.app.graphics.height.toFloat())
 

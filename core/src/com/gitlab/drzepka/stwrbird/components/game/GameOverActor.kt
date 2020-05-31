@@ -60,8 +60,7 @@ class GameOverActor(private val gameScreen: GameScreen) : Table(), GameComponent
         controlsActor.onClickListener = {
             when (it) {
                 ControlsActor.Button.PLAY -> gameScreen.setMode(GameScreen.Mode.TAP_TO_PLAY)
-                ControlsActor.Button.SCORES ->
-                    Commons.android.toast("Najlepsze wyniki nie są w tej chwili dostępne", false)
+                ControlsActor.Button.SCORES -> gameScreen.showScoreboard()
             }
         }
 

@@ -6,14 +6,16 @@ import com.badlogic.gdx.graphics.GL20
 import com.gitlab.drzepka.stwrbird.screen.BaseScreen
 import com.gitlab.drzepka.stwrbird.screen.GameScreen
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 class StwrBird private constructor() : ApplicationAdapter() {
-    //private val FPS = 60f
-    //private val frameTime = (1000f / FPS).toLong()
 
     private val screenStack = Stack<BaseScreen>()
-    private var lastFrame = 0L
+
+    // Flaga określająca, czy stos okien jest w tej chwili modyfikowany. Zapobiega kolejnym
+    // przełączeniom okien, podczas gdy animacja poprzedniego przełączenia jest jeszcze odtwarzana
+    private val isStackBeingModified = AtomicBoolean(false)
 
 
     constructor(androidIface: Android) : this() {
@@ -21,77 +23,83 @@ class StwrBird private constructor() : ApplicationAdapter() {
     }
 
     override fun create() {
-
         // dodanie ekranu głównego
         pushScreen(GameScreen())
-
-        // ustawienie czasu klatki
-        lastFrame = System.currentTimeMillis()
     }
 
     override fun render() {
-        Gdx.gl.glClearColor(1f, 0f, 0f, 1f)
+        Gdx.gl.glClearColor(1f, 01f, 1f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-        /*val delta = System.currentTimeMillis() - lastFrame
-        if (delta < frameTime)
-            Thread.sleep(frameTime - delta)
-
-        screenStack.peek().render((System.currentTimeMillis() - lastFrame) / 1000f)
-        lastFrame = System.currentTimeMillis()*/
-        screenStack.peek().render(Gdx.graphics.rawDeltaTime)
+        // Jednocześnie może być aktywny więcej niż jeden ekran jednocześnie (np. podczas animacji przejść)
+        screenStack.forEach {
+            if (it.visible)
+                it.render(Gdx.graphics.rawDeltaTime)
+        }
     }
 
     /**
      * Dodaje nowy ekran do stosu. Dodany ekran staje się aktywny, podczas gdy poprzednio aktywny ekran jest usypiany.
      */
     fun pushScreen(screen: BaseScreen) {
+        if (isStackBeingModified.get()) return
+        isStackBeingModified.set(true)
+
         // ustawienie pól ekranu
         screen.stwrBird = this
 
-        // wyłączenie obecnego ekranu
-        if (screenStack.isNotEmpty()) {
-            screenStack.peek()?.active = false
-            screenStack.peek()?.pause()
-            screenStack.peek()?.hide()
-        }
+        val currentScreen = if (screenStack.isNotEmpty()) screenStack.peek() else null
 
-        // wrzucenie ekranu na stos
         screenStack.push(screen)
+        screen.visible = true
         screen.create()
         screen.show()
         screen.resume()
-        screen.active = true
+
+        if (screenStack.size > 1) {
+            // Jeśli dodany ekran nachodzi na inny, wyświetl animację nakładania
+            screen.fadeIn {
+                currentScreen?.apply {
+                    visible = false
+                    pause()
+                    hide()
+                }
+            }
+        }
+
+        isStackBeingModified.set(false)
     }
 
     /**
      * Zamyka aktywny ekran. Jeżeli zostanie zamknięty ostatni ekran, aplikacja zakończy działanie.
      */
     fun popScreen() {
-        fun handleScreen(screen: BaseScreen) {
-            screen.active = false
-            screen.pause()
-            screen.hide()
-            screen.dispose()
-        }
+        if (isStackBeingModified.get()) return
+        isStackBeingModified.set(true)
 
-        val screen = screenStack.pop()
-        handleScreen(screen)
-
-        if (screenStack.isNotEmpty()) {
-            // zamknięcie wszystkich oczekujących ekranów
-            while (screenStack.isNotEmpty() && screenStack.peek()?.toBeClosed == true) {
-                handleScreen(screenStack.pop())
+        fun cleanScreen(screen: BaseScreen) {
+            screen.apply {
+                visible = false
+                pause()
+                hide()
+                dispose()
             }
         }
 
-        if (screenStack.isNotEmpty()) {
-            screenStack.peek()?.show()
-            screenStack.peek()?.resume()
-            screenStack.peek()?.active = true
-        }
-        else {
+        if (screenStack.size > 1) {
+            screenStack[screenStack.size - 2].apply {
+                visible = true
+                show()
+                resume()
+            }
+
+            screenStack.peek().fadeOut {
+                cleanScreen(screenStack.pop())
+                isStackBeingModified.set(false)
+            }
+        } else {
             // brak ekranów, zakończ aplikację
+            cleanScreen(screenStack.pop())
             dispose()
             exitProcess(0)
         }

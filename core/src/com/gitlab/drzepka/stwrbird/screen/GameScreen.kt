@@ -29,7 +29,7 @@ class GameScreen : BaseScreen() {
     private var flashStatus = 0f
 
     override fun create() {
-        Gdx.input.inputProcessor = stage
+        super.create()
 
         // załadowanie najlepszego wyniku
         bestScore = Gdx.app.getPreferences("stwr-bird").getInteger("best_score", 0)
@@ -135,6 +135,10 @@ class GameScreen : BaseScreen() {
         }
 
         this.mode = mode
+    }
+
+    fun showScoreboard() {
+        stwrBird.pushScreen(ScoreboardScreen())
     }
 
     enum class Mode {
