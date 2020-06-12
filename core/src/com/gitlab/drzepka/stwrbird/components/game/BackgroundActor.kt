@@ -8,12 +8,12 @@ import com.badlogic.gdx.utils.Timer
 import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.Commons
 import com.gitlab.drzepka.stwrbird.components.BaseActor
-import com.gitlab.drzepka.stwrbird.components.game.pipe.PipeColumn
+import com.gitlab.drzepka.stwrbird.components.game.pipe.BasePipeColumn
+import com.gitlab.drzepka.stwrbird.components.game.pipe.PipeDispatcher
 import com.gitlab.drzepka.stwrbird.config.Pipes
 import com.gitlab.drzepka.stwrbird.font.BaseFont
 import com.gitlab.drzepka.stwrbird.font.BigFont
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.roundToInt
@@ -40,7 +40,10 @@ class BackgroundActor : BaseActor() {
     private val scoreText: BigFont by lazy { BigFont() }
 
     private lateinit var chosenBackground: TextureRegion
-    private val pipeQueue = PipeColumnQueue()
+    private var pipeDispatcher: PipeDispatcher
+    private val pipeQueue: ArrayDeque<BasePipeColumn>
+    private val queueSize = ceil(Gdx.app.graphics.width * 2f / (Pipes.PIPE_WIDTH + Pipes.PIPE_DISTANCE).toDouble()).toInt()
+
 
     private var groundSeries = 0
     private var groundOffset = 0f
@@ -50,6 +53,10 @@ class BackgroundActor : BaseActor() {
     val score: Int
         get() = scoreText.value
 
+    init {
+        pipeDispatcher = PipeDispatcher(queueSize, GROUND_HEIGHT, Gdx.graphics.height.toFloat() - GROUND_HEIGHT)
+        pipeQueue = ArrayDeque(queueSize)
+    }
 
     override fun prepare() {
         // obliczanie długości i liczby podłóg
@@ -64,21 +71,6 @@ class BackgroundActor : BaseActor() {
     }
 
     override fun reset() {
-        // wypełnienie kolejki rurami
-        val amount = ceil(Gdx.app.graphics.width * 2f / (Pipes.PIPE_WIDTH + Pipes.PIPE_DISTANCE).toDouble()).toInt()
-        val initialOffset = Gdx.app.graphics.width * 1.5f
-
-        val list = ArrayList<PipeColumn>()
-        for (i in 0 until amount) {
-            val pipe = PipeColumn(GROUND_HEIGHT, Gdx.graphics.height.toFloat())
-            if (i > 0)
-                pipe.resetPosition(list[i - 1])
-            else
-                pipe.x = initialOffset
-            list.add(pipe)
-        }
-        pipeQueue.setCollection(list)
-
         // losowanie tła
         chosenBackground = if (Random().nextBoolean()) backgroundDay else backgroundNight
 
@@ -87,6 +79,8 @@ class BackgroundActor : BaseActor() {
         generatePipes = false
         pipeSwitched = false
         scoreText.value = 0
+        pipeQueue.clear()
+        pipeDispatcher.reset()
     }
 
     /**
@@ -108,6 +102,7 @@ class BackgroundActor : BaseActor() {
         val xVertices = actorPolygon.transformedVertices?.filterIndexed { index, _ -> index % 2 == 0 }!!
         val rightX = xVertices.max()!!
         val nearestPipe = pipeQueue.minBy { abs(rightX - it.x) }!!
+        println("x: ${nearestPipe.x}")
         if (nearestPipe.collidesWith(actorPolygon)) {
             // kolizja ptaka z rurą
             // dźwięk uderzenia i spadania
@@ -139,13 +134,18 @@ class BackgroundActor : BaseActor() {
 
         // RURY
         if (generatePipes) {
-            if (pipeQueue.first().isDead) {
-                val pipe = pipeQueue.first()
-                pipe.resetPosition(pipeQueue.last())
-                pipeQueue.shift()
+            if (pipeQueue.firstOrNull()?.isDead == true || pipeQueue.size < queueSize) {
+                val pipe = pipeDispatcher.getNextPipe()
+                if (pipeQueue.size == queueSize)
+                    pipeQueue.removeFirst()
+                pipeQueue.add(pipe)
                 pipeSwitched = false
             }
-            pipeQueue.forEach { it.move(moveDistance) }
+
+            pipeQueue.forEach {
+                it.move(moveDistance)
+                it.act(delta)
+            }
         }
 
         // TŁO
@@ -173,58 +173,6 @@ class BackgroundActor : BaseActor() {
     }
 
     override fun drawDebug(shapes: ShapeRenderer?) {
-        pipeQueue.first().drawDebug(shapes)
-    }
-
-    /**
-     * Kolejka rur.
-     */
-    class PipeColumnQueue : Iterable<PipeColumn> {
-
-        private lateinit var array: Array<PipeColumn>
-        private var current = 0
-
-        /**
-         * Ustawia nową zawartość kolejki na podstawie podanej kolekcji.
-         */
-        fun setCollection(collection: Collection<PipeColumn>) {
-            array = collection.toTypedArray()
-            current = 0
-        }
-
-        /**
-         * Zwraca pierwszy element kolejki.
-         */
-        fun first(): PipeColumn = array[current]
-
-        /**
-         * Zwraca ostatni element kolejki.
-         */
-        fun last(): PipeColumn = array[if (current > 0) current - 1 else array.lastIndex]
-
-        /**
-         * Przesuwa pierwszy element na ostatnią pozycję.
-         */
-        fun shift() {
-            current = (current + 1) % array.size
-        }
-
-        override fun iterator(): Iterator<PipeColumn> {
-            return object : Iterator<PipeColumn> {
-
-                private var index = current
-                private var passed = 0
-
-                override fun hasNext(): Boolean = passed < array.size
-
-                override fun next(): PipeColumn {
-                    val pipe = array[index]
-                    index = (index + 1) % array.size
-                    passed++
-                    return pipe
-                }
-
-            }
-        }
+        pipeQueue.firstOrNull()?.drawDebug(shapes)
     }
 }

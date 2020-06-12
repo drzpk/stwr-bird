@@ -11,16 +11,15 @@ import com.gitlab.drzepka.stwrbird.components.BaseActor
 import com.gitlab.drzepka.stwrbird.config.Pipes
 import java.util.*
 
-class PipeColumn(y: Float, height: Float) : BaseActor() {
-
-    private var gapPoint = 0f
+abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
 
     /** Czy kolumna przeszła już przez cały ekran i jest całkowicie niewidoczna */
     var isDead = false
         private set
 
-    private val upperCollisionPolygon = Polygon()
-    private val lowerCollisionPolygon = Polygon()
+    protected var gapPos = 0f
+    protected val upperCollisionPolygon = Polygon()
+    protected val lowerCollisionPolygon = Polygon()
 
     init {
         this.y = y
@@ -43,7 +42,7 @@ class PipeColumn(y: Float, height: Float) : BaseActor() {
         batch?.draw(
                 greenPipe,
                 x,
-                gapPoint - pipeHeight,
+                gapPos - pipeHeight,
                 width,
                 pipeHeight
         )
@@ -52,7 +51,7 @@ class PipeColumn(y: Float, height: Float) : BaseActor() {
         batch?.draw(
                 greenPipe.texture,
                 x,
-                gapPoint + Pipes.PIPE_GAP,
+                gapPos + Pipes.PIPE_GAP,
                 width,
                 pipeHeight,
                 greenPipe.regionX,
@@ -79,8 +78,9 @@ class PipeColumn(y: Float, height: Float) : BaseActor() {
             isDead = true
     }
 
-    fun resetPosition(moveAfter: PipeColumn) {
-        x = moveAfter.x + Pipes.PIPE_WIDTH + Pipes.PIPE_DISTANCE
+    fun reset(moveAfter: BasePipeColumn? = null) {
+        if (moveAfter != null)
+            x = moveAfter.x + Pipes.PIPE_WIDTH + Pipes.PIPE_DISTANCE
         isDead = false
         computeGap()
     }
@@ -88,17 +88,17 @@ class PipeColumn(y: Float, height: Float) : BaseActor() {
     fun isInViewport() = x <= Gdx.graphics.width
 
     fun collidesWith(polygon: Polygon): Boolean {
-        upperCollisionPolygon.setPosition(x, gapPoint - height)
-        lowerCollisionPolygon.setPosition(x, gapPoint + Pipes.PIPE_GAP)
+        upperCollisionPolygon.setPosition(x, gapPos - height)
+        lowerCollisionPolygon.setPosition(x, gapPos + Pipes.PIPE_GAP)
 
         return Intersector.overlapConvexPolygons(polygon, upperCollisionPolygon)
                 || Intersector.overlapConvexPolygons(polygon, lowerCollisionPolygon)
     }
 
-    private fun computeGap() {
+    private fun computeGap() { // todo: percentage based gap
         val range = height - y - Pipes.PIPE_GAP - 2 * Pipes.MIN_PIPE_HEIGHT
         val random = Random().nextInt(range.toInt())
-        gapPoint = random + y + Pipes.MIN_PIPE_HEIGHT
+        gapPos = random + y + Pipes.MIN_PIPE_HEIGHT
     }
 
     companion object {
