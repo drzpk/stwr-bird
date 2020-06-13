@@ -8,11 +8,11 @@ object Pipes {
     /** Szerokość rury */
     val PIPE_WIDTH = Commons.dpi(79)
 
-    /** Odległość między rurami */
+    /** Standardowa odległość między rurami */
     val PIPE_DISTANCE = Commons.dpi(140)
 
-    /** Wysokość przestrzeni między rurami */
-    val PIPE_GAP = Commons.dpi(135)
+    /** Wysokość standardowej przestrzeni między rurami */
+    val GAP_SIZE = Commons.dpi(135)
 
     /** Minimalna wysokość widocznej częsci rury */
     val MIN_PIPE_HEIGHT = Commons.dpi(50)

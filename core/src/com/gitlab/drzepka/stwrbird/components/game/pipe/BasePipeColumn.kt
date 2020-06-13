@@ -17,9 +17,13 @@ abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
     var isDead = false
         private set
 
-    protected var gapPos = 0f
-    protected val upperCollisionPolygon = Polygon()
-    protected val lowerCollisionPolygon = Polygon()
+    /** Współczynik rozmiaru przerwy między rurami względem standardowego rozmiaru*/
+    var gapSizeFactor = 1f
+
+    protected open var gapPos = y + Pipes.MIN_PIPE_HEIGHT
+
+    private val upperCollisionPolygon = Polygon()
+    private val lowerCollisionPolygon = Polygon()
 
     init {
         this.y = y
@@ -33,8 +37,6 @@ abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
                 width, 0f
         )
         lowerCollisionPolygon.vertices = upperCollisionPolygon.vertices.copyOf()
-
-        computeGap()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -51,7 +53,7 @@ abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
         batch?.draw(
                 greenPipe.texture,
                 x,
-                gapPos + Pipes.PIPE_GAP,
+                gapPos + Pipes.GAP_SIZE * gapSizeFactor,
                 width,
                 pipeHeight,
                 greenPipe.regionX,
@@ -78,31 +80,35 @@ abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
             isDead = true
     }
 
-    fun reset(moveAfter: BasePipeColumn? = null) {
+    fun reset(moveAfter: BasePipeColumn? = null, distanceFactor: Float = 1f) {
         if (moveAfter != null)
-            x = moveAfter.x + Pipes.PIPE_WIDTH + Pipes.PIPE_DISTANCE
+            x = moveAfter.x + Pipes.PIPE_WIDTH + Pipes.PIPE_DISTANCE * distanceFactor
         isDead = false
-        computeGap()
+    }
+
+    fun setRandomGapPosition() {
+        setGapPosition(random.nextFloat())
+    }
+
+    fun setGapPosition(percentage: Float) {
+        val range = height - Pipes.GAP_SIZE * gapSizeFactor - 2 * Pipes.MIN_PIPE_HEIGHT
+        gapPos = range * percentage + y + Pipes.MIN_PIPE_HEIGHT
     }
 
     fun isInViewport() = x <= Gdx.graphics.width
 
     fun collidesWith(polygon: Polygon): Boolean {
         upperCollisionPolygon.setPosition(x, gapPos - height)
-        lowerCollisionPolygon.setPosition(x, gapPos + Pipes.PIPE_GAP)
+        lowerCollisionPolygon.setPosition(x, gapPos + Pipes.GAP_SIZE * gapSizeFactor)
 
         return Intersector.overlapConvexPolygons(polygon, upperCollisionPolygon)
                 || Intersector.overlapConvexPolygons(polygon, lowerCollisionPolygon)
     }
 
-    private fun computeGap() { // todo: percentage based gap
-        val range = height - y - Pipes.PIPE_GAP - 2 * Pipes.MIN_PIPE_HEIGHT
-        val random = Random().nextInt(range.toInt())
-        gapPos = random + y + Pipes.MIN_PIPE_HEIGHT
-    }
-
     companion object {
         private val greenPipe: TextureRegion by lazy { Commons.atlas.findRegion("pipe_green") }
         private val pipeHeight = greenPipe.regionHeight * Pipes.PIPE_WIDTH / greenPipe.regionWidth
+
+        private val random = Random()
     }
 }
