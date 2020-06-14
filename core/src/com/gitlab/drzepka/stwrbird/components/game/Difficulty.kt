@@ -38,6 +38,7 @@ class StationaryDifficulty(fromPipe: Int, toPipe: Int?)
     : Difficulty<StationaryPipeColumn>(StationaryPipeColumn::class, fromPipe, toPipe) {
     override fun preparePipe(pipe: StationaryPipeColumn, relativeNo: Int, absoluteNo: Int) {
         pipe.setRandomGapPosition()
+        pipe.useRedTexture = false
     }
 }
 
@@ -47,6 +48,7 @@ class SynchronousMovementDifficulty(fromPipe: Int, toPipe: Int?)
         val pipesPerHeight = 5
         pipe.gapSizeFactor = 1f
         pipe.setGapPosition(relativeNo.rem(pipesPerHeight + 1) / pipesPerHeight.toFloat())
+        pipe.useRedTexture = true
     }
 }
 
@@ -62,6 +64,7 @@ class RandomMovement(
         pipe.gapSizeFactor = gapSizeFactor
         pipe.setRandomGapPosition()
         pipe.movementDirection = if (Random().nextBoolean()) 1 else -1
+        pipe.useRedTexture = true
     }
 }
 
@@ -69,5 +72,7 @@ class CollapsingDifficulty(
     fromPipe: Int,
     toPipe: Int?
 ) : Difficulty<CollapsingPipeColumn>(CollapsingPipeColumn::class, fromPipe, toPipe) {
-    override fun preparePipe(pipe: CollapsingPipeColumn, relativeNo: Int, absoluteNo: Int) = Unit
+    override fun preparePipe(pipe: CollapsingPipeColumn, relativeNo: Int, absoluteNo: Int) {
+        pipe.useRedTexture = true
+    }
 }

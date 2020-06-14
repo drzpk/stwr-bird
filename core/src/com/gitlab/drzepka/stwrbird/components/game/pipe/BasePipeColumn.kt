@@ -17,11 +17,19 @@ abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
     var isDead = false
         private set
 
-    /** Współczynik rozmiaru przerwy między rurami względem standardowego rozmiaru*/
+    /** Współczynik rozmiaru przerwy między rurami względem standardowego rozmiaru */
     var gapSizeFactor = 1f
+
+    /** Czy używać alternatywnej, czerwonej tekstury rury */
+    var useRedTexture = false
+        set(value)  {
+            field = value
+            activePipe = if (value) redPipe else greenPipe
+        }
 
     protected open var gapPos = y + Pipes.MIN_PIPE_HEIGHT
 
+    private var activePipe = greenPipe
     private val upperCollisionPolygon = Polygon()
     private val lowerCollisionPolygon = Polygon()
 
@@ -42,7 +50,7 @@ abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
     override fun draw(batch: Batch?, parentAlpha: Float) {
         // Dolna rura
         batch?.draw(
-                greenPipe,
+                activePipe,
                 x,
                 gapPos - pipeHeight,
                 width,
@@ -51,15 +59,15 @@ abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
 
         // Górna rura
         batch?.draw(
-                greenPipe.texture,
+                activePipe.texture,
                 x,
                 gapPos + Pipes.GAP_SIZE * gapSizeFactor,
                 width,
                 pipeHeight,
-                greenPipe.regionX,
-                greenPipe.regionY,
-                greenPipe.regionWidth,
-                greenPipe.regionHeight,
+                activePipe.regionX,
+                activePipe.regionY,
+                activePipe.regionWidth,
+                activePipe.regionHeight,
                 false,
                 true
         )
@@ -107,6 +115,7 @@ abstract class BasePipeColumn(y: Float, height: Float) : BaseActor() {
 
     companion object {
         private val greenPipe: TextureRegion by lazy { Commons.atlas.findRegion("pipe_green") }
+        private val redPipe: TextureRegion by lazy { Commons.atlas.findRegion("pipe_red") }
         private val pipeHeight = greenPipe.regionHeight * Pipes.PIPE_WIDTH / greenPipe.regionWidth
 
         private val random = Random()
