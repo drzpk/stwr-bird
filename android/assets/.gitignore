@@ -1,3 +1,3 @@
 ## Pliki te są generowane przez zadanie texturePacker w gradle
 texture_atlas.atlas
-texture_atlas.png
+texture_atlas*.png

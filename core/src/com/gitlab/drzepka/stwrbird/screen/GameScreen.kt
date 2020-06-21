@@ -6,9 +6,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils.floor
 import com.gitlab.drzepka.stwrbird.Audio
 import com.gitlab.drzepka.stwrbird.components.game.BackgroundActor
-import com.gitlab.drzepka.stwrbird.components.game.BirdActor
 import com.gitlab.drzepka.stwrbird.components.game.GameOverActor
 import com.gitlab.drzepka.stwrbird.components.game.PlayGameOverlay
+import com.gitlab.drzepka.stwrbird.components.game.PlayerActor
 import com.gitlab.drzepka.stwrbird.data.ScoreData
 import com.gitlab.drzepka.stwrbird.model.Medal
 import com.gitlab.drzepka.stwrbird.model.Score
@@ -22,10 +22,10 @@ class GameScreen : BaseScreen() {
 
     private var mode = Mode.TAP_TO_PLAY
 
-    private val tapToPlayOverlay = PlayGameOverlay()
+    private val tapToPlayOverlay = PlayGameOverlay(this)
     private val gameOverActor = GameOverActor(this)
     private val backgroundActor = BackgroundActor()
-    private val birdActor = BirdActor()
+    private val playerActor = PlayerActor()
     private val shapeRenderer = ShapeRenderer()
 
     private var bestScore = 0
@@ -45,25 +45,24 @@ class GameScreen : BaseScreen() {
 
         tapToPlayOverlay.setSize(1f, 1f)
         stage.addActor(tapToPlayOverlay)
+        tapToPlayOverlay.onPlayerTypeSelected = {
+            playerActor.playerType = it
+        }
 
         gameOverActor.prepare()
-        birdActor.prepare()
+        playerActor.prepare()
 
-        stage.addActor(birdActor)
+        stage.addActor(playerActor)
         setMode(Mode.TAP_TO_PLAY)
     }
 
     override fun render(delta: Float) {
-        if (Gdx.input.justTouched() && mode == Mode.TAP_TO_PLAY)
-            setMode(Mode.GAME)
-
         stage.act(delta)
 
         // SPRAWDZENIE KOLIZJI
-        if (mode == Mode.GAME && backgroundActor.checkForCollision(birdActor)) {
+        if (mode == Mode.GAME && backgroundActor.checkForCollision(playerActor)) {
             // kolizja - koniec gry
             setMode(Mode.GAME_OVER)
-
         }
 
         stage.draw()
@@ -88,7 +87,7 @@ class GameScreen : BaseScreen() {
         when (mode) {
             Mode.FIRST -> TODO()
             Mode.TAP_TO_PLAY -> {
-                birdActor.reset()
+                playerActor.reset()
                 backgroundActor.reset()
                 gameOverActor.remove()
                 tapToPlayOverlay.isVisible = true
@@ -99,7 +98,9 @@ class GameScreen : BaseScreen() {
             Mode.GAME -> {
                 tapToPlayOverlay.isVisible = false
                 backgroundActor.generatePipes = true
-                birdActor.started = true
+                playerActor.started = true
+                playerActor.gameOver = false
+                playerActor.fly()
                 gameStartTime = Date()
                 gameOverActor.remove()
             }
@@ -108,7 +109,8 @@ class GameScreen : BaseScreen() {
 
                 backgroundActor.started = false
                 backgroundActor.generatePipes = false
-                birdActor.started = false
+                playerActor.started = false
+                playerActor.gameOver = true
 
                 // włączenie błysku
                 flashAnimation = true

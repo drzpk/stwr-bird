@@ -87,7 +87,7 @@ class BackgroundActor : BaseActor() {
      * Sprawdza, czy dany aktor koliduje z podłożem lub z jedną z rur. Ta metoda musi być wywoływana podczas każdej
      * klatki, w przeciwnym razie punkty nie będą naliczane prawidłowo.
      */
-    fun checkForCollision(actor: BirdActor): Boolean {
+    fun checkForCollision(actor: PlayerActor): Boolean {
         val actorPolygon = actor.getPolygon() ?: return false
 
         // sprawdzenie kolizji z podłożem
@@ -102,7 +102,6 @@ class BackgroundActor : BaseActor() {
         val xVertices = actorPolygon.transformedVertices?.filterIndexed { index, _ -> index % 2 == 0 }!!
         val rightX = xVertices.max()!!
         val nearestPipe = pipeQueue.minBy { abs(rightX - it.x) }!!
-        println("x: ${nearestPipe.x}")
         if (nearestPipe.collidesWith(actorPolygon)) {
             // kolizja ptaka z rurą
             // dźwięk uderzenia i spadania
