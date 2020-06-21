@@ -73,3 +73,31 @@ można zainstalować na urządzeniu z Androidem za pomocą poniższego polecenia
 ```
 adb install android/build/outputs/apk/debug/android-debug.apk
 ``` 
+
+## Opis techniczny
+
+Ta sekcja zawiera opis gry od strony technicznej.
+
+### Struktura gry
+
+Gra jest podzielona na ekrany. Każdy ekran zawiera pewną liczbę aktorów, czyli elementy posiadające pewne właściwości
+(np. rozmiar, położenie, obrót) i mogące być narysowane na ekranie. Aktorzy zawierają logikę odpowiedzialną
+za funkcjonowanie gry.
+
+Poniżej zostały przedstawione i opisane najważniejsze klasy projektu.
+
+* `StwrBird` - Główna klasa i punkt startowy gry. Zawiera kod odpowiedzialny za zarządzanie zdefiniowanymi ekranami.
+* `GameScreen` - Ekran przedstawiający scenerię właściwej gry. Koordynuje wyświetlanie aktorów odpowiedzialnych
+za różne etapy rozgrywki (menu główne, gra w toku, koniec gry). 
+* `ScoreboardScreen` - Ekran przedstawiający najlepsze wyniki. Odpowiaada za załadowanie najlepszych wyników z danych
+aplikacji oraz wyświetlenie ich w liście za pomocą aktorów.
+* `PlayerActor` - Przedstawia postać gracza. Reaguje na zdarzenia dotknięcia ekranu w celu aktualizacji prędkości
+w osi pionowej. Włącza jedną z dostepnych tekstur postaci, w zależności od bieżących ustawień gry.
+* `BackgroundActor` - Rysuje tło gry, podłoże oraz przeszkody. Zawiera logikę wykrywającą kolizję z graczem.
+* `GameOverActor` - Wyświetlany po uderzeniu gracza w przeszkodę, wyświetla informacje o wyniku.
+* `ScoreElementLayout` - Przedstawia element listy najlepszych wyników.
+* `PipeDispatcher` - Klasa przypominająca swoją funkcjonalnością kolejkę. Generuje w locie parametry kolejnych
+przeszkód do umieszczenia na ekranie przed graczem. Parametryzacja jest pobierania z definicji poziomów trudności.
+ 
+
+![digram](docs/images/diagram.png "Diagram")
